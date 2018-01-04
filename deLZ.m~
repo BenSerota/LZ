@@ -1,0 +1,8 @@
+function [UNCOMP] = deLZ(COMP, D)
+UNCOMP = {[]};
+for i = 1:length(D)
+   UNCOMP{i} = COMP{i};
+end
+
+cell2mat(UNCOMP)
+cell2mat(UNCOMP)
