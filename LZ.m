@@ -1,13 +1,14 @@
-function [COMP] = LZ(UNCOMP)
+function [COMP, D] = LZ_simp(UNCOMP)
 % This function compresses a binary time-series using the Lempel Ziv Welch Algorithm.
 
 %% beg
-data = UNCOMP;
+data = string(UNCOMP);
 D = num2cell(unique(data)');
-% D = cellfun(@num2str,D,'UniformOutput',false);
+cellfind = @(string)(@(cell_contents)(strcmp(string,cell_contents)));
+
 i = 1;
 one = [];
-two = data(i);
+two = {data(i)};
 COMP = [];
 fin = 0;
 
@@ -15,13 +16,18 @@ fin = 0;
 
 while ~fin
     
-    %     comb = num2str([one two]);
-    comb = [one two];
+    if i == 1
+        comb = two;
+    else
+        comb = {strcat(one{1},two{1})};
+    end
+    
     % eradicating spaces and joining numbers, in a cell, conv to double.
-    comb = {comb(~isspace(comb))};
-%         comb = {str2double(comb(~isspace(comb)))};
-
-    if cellismember(comb, D)
+    
+    % checking if comb is member of D
+    izmember = nnz(cellfun(cellfind(comb{1}),D));
+    
+    if izmember
         
         % for next flop:
         one = comb;
@@ -30,20 +36,21 @@ while ~fin
         if i ~= length(data)+1  % = not end of data series
             two = data(i);
         else
-            COMP(end+1) = find(cellismember(one,D));
+            COMP{end+1} = find(cellfun(cellfind(one{1}),D));
         end
         
         
     else
         % aadd to dictionary
-        D(end+1) = comb;
+        D{end+1} = comb{1};
         % write to output
-        COMP(end+1) = find(cellismember(one,D));
+        
+        COMP{end+1} = find(cellfun(cellfind(one{1}),D));
         
         % for next flop:
         one = two;
         i = i+1;
-        two = data(i);
+        two = {data(i)};
     end
     
     
@@ -52,15 +59,3 @@ while ~fin
     end
 end
 
-
-%% etc
-% %% identify data
-% class = class(d);
-% switch class
-%     case 'double'
-%
-%     case 'char'
-%
-%     otherwise
-%         disp('data of unknown class')
-% end
