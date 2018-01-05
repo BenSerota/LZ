@@ -24,10 +24,10 @@ while ~fin
 %% prep for "cell string is member"
 cellfind = @(string)(@(cell_contents)(strcmp(string,cell_contents)));
 % logical_cells = find(cellfun(cellfind(one{1}),D));
-izmember = nnz(cellfun(cellfind(one{1}),D))
+izmember = nnz(cellfun(cellfind(one{1}),D));
 %% t
 
-    if cellismember(comb, D)
+    if izmember
         
         % for next flop:
         one = comb;
