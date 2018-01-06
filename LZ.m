@@ -1,9 +1,13 @@
-function [COMP, D] = LZ_simp(UNCOMP)
+function [COMP, D, Dims] = LZ(UNCOMP)
 % This function compresses a binary time-series using the Lempel Ziv Welch Algorithm.
 
-%% beg
-data = string(UNCOMP);
+%% begg
+Dims = size(UNCOMP);
+data = string(UNCOMP(:));
 D = num2cell(unique(data)');
+l = length(data);
+% D = cell(l,1);
+% D(1:l) = num2cell(unique(data)');
 cellfind = @(string)(@(cell_contents)(strcmp(string,cell_contents)));
 
 i = 1;
@@ -33,7 +37,7 @@ while ~fin
         one = comb;
         i = i+1;
         
-        if i ~= length(data)+1  % = not end of data series
+        if i ~= l+1  % = not end of data series
             two = data(i);
         else
             COMP{end+1} = find(cellfun(cellfind(one{1}),D));
@@ -50,11 +54,15 @@ while ~fin
         % for next flop:
         one = two;
         i = i+1;
+        try
         two = {data(i)};
+        catch
+            i;
+        end
     end
     
     
-    if i == length(data)+1
+    if i == l+1
         fin = 1;
     end
 end
