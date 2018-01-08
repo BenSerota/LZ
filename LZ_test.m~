@@ -5,7 +5,7 @@ clc
 % profile on
 
 % test parameters (Number of runs, sqrt of data length)
-[n,l] = LZ_param (100,30);
+[n,l] = LZ_param (10,20);
 % small BUG: below 5 digits depends on 1
 
 reps = nan(1,n);
@@ -59,7 +59,12 @@ figure;
 scatter(rel_comps,LZ_size,'*')
 xlabel('relative complexity')
 ylabel('LZ size')
-lsline
+hold on
+isline
+
+plotregression(rel_comps,LZ_size)
+isline(ax)
+hold on
 
 % corrcoef(rel_comps,LZ_size)
 % [linear] = polyfit(rel_comps,LZ_size,1);
