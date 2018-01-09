@@ -1,8 +1,8 @@
 % random test
 %% digits
-t = randi([0 1], 1,100);
-[uncomp d dims] = LZ(t);
-recon = deLZ(uncomp,d,dims);
+t = randi([0 1], 10,100);
+[comp d dims] = LZ(t);
+recon = deLZ(comp,d,dims);
 
 if isequal(recon,t)
     fprintf('\n SUCCESS! Original data and restored data are IDENTICAL \n')
@@ -12,7 +12,7 @@ end
 
 
 %% chars
-t = 'totosmaymakemenmeasurerealtotos'; %yesterdayiwenttothedoctor'; %'wakkawakka';
+t = 'OrenIsTalkingToMeTightRightRightNow'; %totosmaymakemenmeasurerealtotos'; %yesterdayiwenttothedoctor'; %'wakkawakka';
 [uncomp d dims] = LZ(t);
 recon = deLZ(uncomp,d,dims)
 if isequal(recon,t)

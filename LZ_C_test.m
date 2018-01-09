@@ -5,8 +5,7 @@ clc
 profile on
 
 % test parameters (Number of runs, sqrt of data length)
-[n,l] = LZ_param (100,30);
-% small BUG: below 5 digits depends on 1
+[n,l] = LZ_param (10,30);
 
 reps = nan(1,n);
 lengths = nan(1,n);
