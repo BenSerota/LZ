@@ -22,7 +22,10 @@ else
 end
 
 %% long data set
-cd('/Users/admin/Dropbox/Ben Serota/momentary')
+
+% cd('/Users/admin/Dropbox/Ben Serota/momentary')
+cd('E:\Dropbox\Ben Serota\momentary')
+
 t = randi([0 1], 200,100);
 tUncomp{1} = t;
 save tUncomp
