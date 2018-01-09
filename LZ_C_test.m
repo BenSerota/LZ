@@ -2,18 +2,21 @@
 %test LZ complexity
 clear
 clc
-% profile on
+profile on
 
 % test parameters (Number of runs, sqrt of data length)
-[n,l] = LZ_param (100,30);
+[n,l] = LZ_param (100,50);
 % small BUG: below 5 digits depends on 1
 
 reps = nan(1,n);
 lengths = nan(1,n);
-failed_Comps = cell(1,n);
-
+failed_DeComps = cell(0);
+failed_Comps = cell(0);
+c = 0;
+bad = [];
 
 for i = 1:n
+    
     
     lengths(i) = l^2;                                                       % saving for later
     
@@ -25,18 +28,21 @@ for i = 1:n
     for j = pos                                                             % assign pattern.
         data(j,:) = pattern;
     end
+    
     % compress data
     try
         [DataComp, d, dims] = LZ(data);
     catch
-        failed_Comps{i} = sprintf('lottery %s, length = %g',i,l);
+        failed_Comps{end+1} = sprintf('lottery %g',i);
+        jj(end+1)= i;                                                       
     end
     
     % restore  data
     try
         DataRestored = deLZ(DataComp,d, dims);
     catch
-        failed_DeComps{i} = sprintf('lottery %s, length = %g',i,l);
+        failed_DeComps{end+1,1} = sprintf('lottery %g',i);
+        ii(end+1)= i;
     end
     
     
@@ -44,14 +50,27 @@ for i = 1:n
     try
         if ~isequal(DataRestored,data)
             Data_Not_Equal(end+1) = i;
+        else
+        c = c+1;
         end
     catch
+        bad(end+1) = i;
     end
     
     LZ_size(i) = length(DataComp);
     
     rel_comps(i) = 1-(reps(i) / l);     % complexity relative to l
     
+end
+
+% sanity check
+if isequal(c,n)
+    fprintf('\n SUCCESS! All data sets were equal')
+else
+    fprintf('\n ERROR! NOT all data sets were equal')
+    fprintf('\n error in Compression in datasets: %s', num2str(jj))
+    fprintf('\n error in DeCompression in datasets: %s', num2str(ii))
+
 end
 
 
@@ -61,19 +80,10 @@ xlabel('relative complexity')
 ylabel('LZ size')
 lsline
 
-% corrcoef(rel_comps,LZ_size)
-% [linear] = polyfit(rel_comps,LZ_size,1);
-% x = linspace(0,1);
-% y = x.^linear(1) + linear(2);
-% plot(x,y)
 
-% figure()
-% plot (lengths,LZ_size,'*')
-% xlabel('length of data')
-% ylabel('LZ size')
-%
-% profile viewer
+profile viewer
 
+%% inner functions
 
 function [n,l] = LZ_param (N,L)
 n = N; l = L;

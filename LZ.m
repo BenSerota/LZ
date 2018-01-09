@@ -8,7 +8,7 @@ D = num2cell(unique(data)');
 l = length(data);
 cellfind = @(string)(@(cell_contents)(strcmp(string,cell_contents)));
 
-COMP = [];
+COMP = cell(0); % HERE DA PROBLEM. first is [];
 
 %% starting
 % first digit is necessarily a member of D, next
@@ -46,20 +46,18 @@ end
 %% for final digit:
 comb = {strcat(one{1},two{1})};
 % checking if comb is member of D
-% izmember = nnz(cellfun(cellfind(comb{1}),D));
-% if izmember
-% for next flop:
-one = comb;
-COMP{end+1} = find(cellfun(cellfind(one{1}),D));
-
-% else
-% aadd to dictionary
-%     D{end+1} = comb{1};
-
-% write to output
-%     COMP{end+1} = find(cellfun(cellfind(one{1}),D));
-
-
-
-
+izmember = nnz(cellfun(cellfind(comb{1}),D));
+if izmember
+    one = comb;
+    COMP{end+1} = find(cellfun(cellfind(one{1}),D));
+else
+    D{end+1} = comb{1};
+    
+    % write to output
+    COMP{end+1} = find(cellfun(cellfind(comb{1}),D));
+    
+    if COMP{end} ~= length(D)
+        i
+    end
+end
 
