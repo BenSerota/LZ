@@ -1,8 +1,8 @@
 % random test
 %% digits
-t = randi([0 1], 1,5);
+t = randi([0 1], 1,100);
 [uncomp d dims] = LZ(t);
-recon = deLZ(uncomp,d,dims)
+recon = deLZ(uncomp,d,dims);
 
 if isequal(recon,t)
     fprintf('\n SUCCESS! Original data and restored data are IDENTICAL \n')

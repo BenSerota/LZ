@@ -1,12 +1,13 @@
 function [UNCOMP] = deLZ(COMP, D, Dims)
 % This function decompresses a LZW compressed series.
 % necessary input is compressed file and dictionary.
+first1 = 0;
 
 l = length(COMP);
 temp = cell(1,l);
 for i = 1:l
     try
-    temp{i} = D{COMP{i}};
+        temp{i} = D{COMP{i}};
     catch
         i
     end
@@ -21,19 +22,41 @@ temp = temp(~isspace(temp));
 l = length(temp);
 out = nan(l,1);
 
-c = class(temp(1));
-eval(temp(1))
-switch c
-    case 'double'
-for i = 1:l
-    if strcmp(temp(i), '1')
-        out(i) = 1;
-    else
-        out(i) = 0;
-    end
+try
+    c = eval(temp(1));
+    c = 'numbers';
+catch
+    c = 'letters';
 end
 
-UNCOMP = reshape(out,Dims(1),Dims(2));
-
-    case 'char'
+switch c
+    case 'numbers'
+        
+        % looking for 
+        first0 = 0;
+        while ~first1
+        
+        
+        = temp(i)=='0';                                              % flagging first 0
+        
+        out = str2double(temp);
+        
+        if first0
+            out = [0,out];
+        end
+        
+        %         for i = 1:l
+        %             if strcmp(temp(i), '1')
+        %                 out(i) = 1;
+        %             else
+        %                 out(i) = 0;
+        %             end
+        %         end
+        
+        UNCOMP = reshape(out,Dims(1),Dims(2));
+        
+    case 'letters'
+        %continue without translating string into numbers or reshaping
+        UNCOMP = temp;
+        
 end

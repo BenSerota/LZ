@@ -8,7 +8,7 @@ D = num2cell(unique(data)');
 l = length(data);
 cellfind = @(string)(@(cell_contents)(strcmp(string,cell_contents)));
 
-COMP = cell(0); % HERE DA PROBLEM. first is [];
+COMP = cell(0);
 
 %% starting
 % first digit is necessarily a member of D, next
