@@ -22,11 +22,15 @@ else
 end
 
 %% long data set
+profile on
 
-% cd('/Users/admin/Dropbox/Ben Serota/momentary')
-cd('E:\Dropbox\Ben Serota\momentary')
+if ismac
+    cd('/Users/admin/Dropbox/Ben Serota/momentary')
+elseif ispc
+    cd('E:\Dropbox\Ben Serota\momentary')
+end
 
-t = randi([0 1], 200,100);
+t = randi([0 1], 200,10);
 tUncomp{1} = t;
 save tUncomp
 [uncomp d dims] = LZ(t);
@@ -40,3 +44,4 @@ if isequal(recon,t)
 else
     fprintf('\n Failure! Original Data and restored data are NOT identical \n')
 end
+profile viewer

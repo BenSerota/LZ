@@ -8,7 +8,7 @@ end
 profile on
 
 % test parameters (Number of runs, sqrt of data length)
-[p,l] = LZ_param (1000,50);
+[p,l] = LZ_param (10,10);
 
 reps = nan(1,p);
 % lengths = nan(1,p);
@@ -81,8 +81,7 @@ n = l^2;
 b = n/log2(n);
 dSizes = cellfun(@(x) length(x),d);
 DataCompSizes = cellfun(@(x) length(x),DataComp);
-y = dSizes./b;
-% y = DataCompSizes./b;
+y = DataCompSizes./b;
 
 %%
 x = rel_complx;
