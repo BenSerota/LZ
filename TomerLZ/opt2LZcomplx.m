@@ -1,4 +1,5 @@
 function [c,C] = opt2LZcomplx(opt)
+tic
 %opt has to be x x t
 [c,r,q,k] = deal(1);
 i = 2;
@@ -53,3 +54,4 @@ if isnan(h)
 end
 L = C*R;
 C = c*log2(L)/L/h;
+toc
