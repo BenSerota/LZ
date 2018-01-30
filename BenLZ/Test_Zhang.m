@@ -1,22 +1,24 @@
 % Zhang Test
+
 clear
 clc
-% data = randi([0 1],2e2,35e3);
+% data = randi([0 1],1e3,1e3);
+% % data = [1 1 1 0 0 1 0 0 1 1 1 1];
 % C = LZ_C_Zhang(data);
 
 %%
-s1 = 200; % channels
-s2 = 35e2; % timepoints
-rep = 1e2;
-reps = nan(1,rep);
+s1 = 1e2; % channels
+s2 = 1e2; % timepoints
+rep = 100; %e2;
+[C,reps] = deal(nan(1,rep));
 
 for i = 1:rep
        
     % generating data : some more some less random
     data = randi([0 1], s1,s2);
     pattern = randi([0 1], 1,s2);                                           % pattern to be repeated
-    reps(i) = randi([0 l]);                                                 % how many reps
-    pos = randi([1 l], 1,reps(i));                                          % location of rows
+    reps(i) = randi([0 s1]);                                                 % how many reps
+    pos = randi([1 s1], 1,reps(i));                                          % location of rows
     for j = pos                                                             % assign pattern.
         data(j,:) = pattern;
     end
@@ -33,25 +35,25 @@ elseif ispc
     cd('E:\DOC\WorkSpaces')
 end
 
-save ('LZ_Zhang_WS')
-
+% SaveUniqueName('LZ_Zhang_WS');
 %% plotting 
 
-X = 1-reps./s1; %% HERE
-dSizes = cellfun(@(x) length(x),d);
-DataCompSizes = cellfun(@(x) length(x),DataComp);
-y = dSizes./b;
+x = 1-reps/s1; %% HERE
+y = C;
+% dSizes = cellfun(@(x) length(x),d);
+% DataCompSizes = cellfun(@(x) length(x),DataComp);
+% y = dSizes./b;
 % y = DataCompSizes./b;
 
 %%
-x = rel_complx;
+% x = rel_complx;
 % y = LZ_size;
 figure('name', 'data');
 scatter(x,y,'o')
 hold on
 title('Length of LZ compressed code by Randomness')
 xlabel('Relative Randomeness')
-ylabel('Size of LZ compressed code')
+ylabel('normalised LZ complexity')
 
 %% linear regression
 p = polyfit(x,y,1);
@@ -89,7 +91,7 @@ yfit_var = polyval(p_var,x);
 plot(x,yfit_var,'g-')
 title('Variance by Randomness : linear and non linear regression')
 xlabel('Relative Randomeness')
-ylabel('Variance of LZ lengths of compressed codes')
+ylabel('Variance of normalized LZ complexity grades')
 r_var = corrcoef(yfit_var,locvar);
 r_var = round(r_var(2),2); % (2) cuz diagonal is 1 and this is linear reg.
 loc_yfit_var = 1.75*max(yfit_var);
@@ -104,7 +106,7 @@ yfit2_var = polyval(p2_var,x);
 plot(x,yfit2_var,'r*')
 % title('Variance by Randomness : NON linear reg')
 xlabel('Relative Randomeness')
-ylabel('Variance of LZ lengths of compressed codes')
+ylabel('Variance of normalized LZ complexity grades')
 r2_var = corrcoef(yfit2_var,locvar2);
 r2_var = round(r2_var(2),2); % (2) cuz diagonal is 1 and this is linear reg.
 loc_yfit2_var = 1.75*max(yfit2_var);
@@ -114,3 +116,16 @@ legend ('linear deviations','linear reg','non-linear deviations','non-linear reg
 
 tilefigs
 
+%% assisting functions
+
+function [] = SaveUniqueName(root_name)
+if ~isstring(root_name) && ~ischar(root_name)
+    error('input must be of class char or string')
+end
+cl = fix(clock);
+stamp = strrep(mat2str(cl),' ','_');
+stamp = strrep(stamp,'[','');
+stamp = strrep(stamp,']','');
+UniqueName = [root_name '_' stamp];
+save (UniqueName)
+end
