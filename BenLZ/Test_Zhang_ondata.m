@@ -7,7 +7,7 @@ if ispc
 end
 global conds subconds data_paths out_paths
 
-if isequal(date,'30-Jan-2018')
+if isequal(date,'31-Jan-2018')
     DOC_Basic2
 else
     DOC_basic
@@ -37,22 +37,18 @@ function [C_cond] = onecondLZC(cond,Zthresh)
 load([cond '_names']);                                             % loads name list
 names = sortn(names);                                                       % for fun
 n = length(names);
-% work on this?:
-% names = cellfun(@(x) x,'.mat','', names);
-for i = 1:n                                                                 % drops '.mat' ending
-    names{i,1} = strrep(names{i,1},'.mat','');
-end
+names = strrep(names,'.mat','');                                            % drops '.mat' ending
 
 s = randi([1 n]);                                                           % draws RANDOM SINGLE subject
 n = length(s);
 C_cond = cell(1,n);
 for i = 1:s
     % CHANGE HERE !!
-    if isequal(date,'30-Jan-2018')
+    if isequal(date,'31-Jan-2018')
         name = names{i};
         C_cond{i} = onesbjLZC(name,Zthresh);
     else
-        name = [names{i} '%s_prep'];
+        name = names{i};
         C_cond{i} = onesbjLZC(name,Zthresh);
     end
 end
