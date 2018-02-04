@@ -1,0 +1,5 @@
+clear
+clc
+start_ben
+E_T_flag = 1;
+LZC_OnData(E_T_flag)

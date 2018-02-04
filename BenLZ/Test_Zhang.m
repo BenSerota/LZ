@@ -7,8 +7,8 @@ clc
 % C = LZ_C_Zhang(data);
 
 %%
-s1 = 1e2; % channels
-s2 = 1e2; % timepoints
+s1 = 2e2; % channels
+s2 = 385; % timepoints
 rep = 100; %e2;
 [C,reps] = deal(nan(1,rep));
 
@@ -51,7 +51,7 @@ y = C;
 figure('name', 'data');
 scatter(x,y,'o')
 hold on
-title('Length of LZ compressed code by Randomness')
+title('Level of Randomness against LZ complexity')
 xlabel('Relative Randomeness')
 ylabel('normalised LZ complexity')
 
