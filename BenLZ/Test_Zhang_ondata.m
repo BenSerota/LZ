@@ -36,26 +36,7 @@ for i = 1:N
 end
 
 %% plotting
-% per condition:
-C_fig = figure('name','Complexity grades per cond');
-y_ave = nan(1,4);
-for i = 1:N
-    y = C{i};
-    n = numel(y);
-    x = repmat(i,n,1);
-    y_ave(i) = mean(y); 
-    scatter(x,y)
-    hold on
-end
-plot(y)
-title('Complexity grades per cond')
-ylabel('LZ complexity grade')
-xticks(1:4)
-xlim([0.5 4.5])
-set(gca,'xticklabel',conds)
-xlabel('Level of Consciousness')
-cd('E:\Dropbox\Ben Serota\momentary\Figs')
-savefig(C_fig,['LZC_ondata' date])
+figitup(C,'_ChainElectrode',1)
 
 %% functions
 
@@ -132,7 +113,7 @@ stamp = strrep(mat2str(cl),' ','_');
 stamp = strrep(stamp,'[','');
 stamp = strrep(stamp,']','');
 UniqueName = [root_name '_' stamp];
-save (UniqueName)
+evalin('base', sprintf('save ("%s")', UniqueName));
 end
 
 
