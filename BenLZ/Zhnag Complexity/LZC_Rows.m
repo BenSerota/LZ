@@ -1,5 +1,5 @@
 % LZ complx, following Shang Zhang
-function [c_norm] = LZC_Gen (data,E_T_flag)
+function [c_norm] = LZC_Rows (data,E_T_flag)
 % tic
 if E_T_flag
     data = data';       % IF TRANSPOSED => "electrodes" = Time Points!
@@ -13,7 +13,7 @@ for e = 1:electrodes
     P =  strrep(P,']','');
     P =  strrep(P,';','');
     n = numel(P);
-    i = 2;
+    i = 2;qui
     c = 0;
     Q = string(P(i));
     S = string(P(i-1));

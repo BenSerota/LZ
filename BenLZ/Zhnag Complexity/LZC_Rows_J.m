@@ -91,7 +91,7 @@ if n<e
 end
 C_task = nan(1,e); %n !
 for i = 1:e %n
-    C_task(i) = LZC_Gen(data_binary(:,:,i),E_T_flag);
+    C_task(i) = LZC_Rows(data_binary(:,:,i),E_T_flag);
 end
 end
 

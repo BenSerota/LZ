@@ -24,7 +24,10 @@ for i = 1:rep
     end
     
     % compress data
-    C(i) = LZ_C_Zhang(data);
+    C(i) = LZC_Chain(data);
+%     CC(i) = LZC_rows(data,0);
+%     CCC(i) = LZC_rows(data,1);
+% COMPARE the 3
     
 end
 

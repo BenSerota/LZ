@@ -92,7 +92,7 @@ if n<e
 end
 C_task = nan(1,e); %n !
 for i = 1:e %n
-    C_task(i) = LZ_C_Zhang(data_binary(:,:,i));
+    C_task(i) = LZC_Chain(data_binary(:,:,i)); %% NOTICE HERE: LZC_CHAIN : not rows
 end
 end
 

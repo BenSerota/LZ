@@ -1,5 +1,5 @@
 % LZ complx, following Shang Zhang
-function [c_norm] = LZ_C_Zhang (data)
+function [c_norm] = LZC_Chain (data)
 tic
 P = strrep((mat2str(data)),' ','');
 P = strrep(P,'[','');
