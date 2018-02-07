@@ -15,7 +15,7 @@ N = numel(conds);
 
 C_all_conds = allcondsLZC(conds,subconds,Zthresh);
 cd('E:\Dropbox\Ben Serota\momentary\WS')
-SaveUniqueName('LZC_ondata')
+SaveUnique('LZC_ondata')
 
 %% preparing plot
 %C_all_conds to mat
@@ -104,17 +104,17 @@ binary = data>Zthresh;
 binary = double(binary);
 end
 
-function [] = SaveUniqueName(root_name)
-if ~isstring(root_name) && ~ischar(root_name)
-    error('input must be of class char or string')
-end
-cl = fix(clock);
-stamp = strrep(mat2str(cl),' ','_');
-stamp = strrep(stamp,'[','');
-stamp = strrep(stamp,']','');
-UniqueName = [root_name '_' stamp];
-evalin('base', sprintf('save ("%s")', UniqueName));
-end
-
+% function [] = SaveUniqueName(root_name)
+% if ~isstring(root_name) && ~ischar(root_name)
+%     error('input must be of class char or string')
+% end
+% cl = fix(clock);
+% stamp = strrep(mat2str(cl),' ','_');
+% stamp = strrep(stamp,'[','');
+% stamp = strrep(stamp,']','');
+% UniqueName = [root_name '_' stamp];
+% evalin('base', sprintf('save ("%s")', UniqueName));
+% end
+% 
 
 

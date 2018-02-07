@@ -1,4 +1,4 @@
-function [] = ShaySave(root_name)
+function [] = SaveUnique(root_name)
 % if ~isstring(root_name) && ~ischar(root_name)
 %     error('input must be of class char or string')
 % end
@@ -9,5 +9,5 @@ stamp = strrep(stamp,']','');
 UniqueName = [root_name '_' stamp];
 % save (UniqueName)
 
-v = evalin('base', sprinf('save ("%s");', UniqueName));
+evalin('base', sprintf('save ("%s");', UniqueName));
 
