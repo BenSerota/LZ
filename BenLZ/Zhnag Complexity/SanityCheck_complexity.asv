@@ -10,6 +10,7 @@ function [] = SanityCheck_complexity (randbyrow,reps)
 DOC_basic
 rows = 2e2; % channels
 cols = 385; % timepoints
+reps = 2e2; % repetitions
 [copies,C_chained,C_channels,C_timepoints] = deal(nan(1,reps));
 
 for i = 1:reps

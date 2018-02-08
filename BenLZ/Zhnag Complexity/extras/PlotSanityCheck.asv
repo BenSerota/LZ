@@ -10,7 +10,7 @@ y = C;
 % x = rel_complx;
 % y = LZ_size;
 figure('name', 'data');
-h1 = scatter(x,y,'o');
+scatter(x,y,'o')
 hold on
 title([ title_insrt ' - Level of Randomness against LZ complexity'])
 xlabel('Relative Randomeness')
@@ -19,7 +19,7 @@ ylabel('normalised LZ complexity')
 %% linear regression
 p = polyfit(x,y,1);
 yfit = polyval(p,x);
-plot(x,yfit,'g')
+h1 = plot(x,yfit,'g');
 hold on
 yres = y - yfit;
 locvar = yres.^2;
@@ -33,7 +33,7 @@ text(0.8, center_yfit,sprintf('r = %g',r),'fontsize',14,'color','green')
 %% non-linear regresion
 p2 = polyfit(x,y,2);
 yfit2 = polyval(p2,x);
-plot(x,yfit2,'r*')
+h1 = plot(x,yfit2,'r*');
 hold on
 yres2 = y - yfit2;
 locvar2 = yres2.^2;
@@ -46,7 +46,7 @@ text(0.8, center_yfit2,sprintf('r = %g',r2),'fontsize',14,'color','red')
 %plotting deviations (variance?)
 if var_flag
     figure('name', 'variance linear reg')
-    h2 = scatter(x,locvar,'go');
+    scatter(x,locvar,'go')
     hold on
     p_var = polyfit(x,locvar,1);
     yfit_var = polyval(p_var,x);
