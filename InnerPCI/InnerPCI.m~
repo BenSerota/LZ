@@ -63,25 +63,28 @@ b_data = binarize(data,ZTHRESH2);
 
 %% generate "new epochs"
 % "new epchs" = TIME_W after good events
-inds = big_events(:,3:4); % don't care about rows right now
-start_ind = unique(inds,'rows');
-end_ind  = start_ind(:,1) + 299; % to get to 300 TP 
-epochs = start_ind(:,2);
+start_ind = big_events(:,3:4); % don't care about rows right now
+start_ind = unique(start_ind,'rows');
+end_ind  = start_ind + [300,0];
 
-n_epochs = nan(size(data,1),TIME_W,length(end_ind));
-for i = 1:length(end_ind)
-    n_epochs(:,:,i) = b_data (:,start_ind(i,1):end_ind(i,1),epochs(i));
+
+for i = 1:lenght(end_ind)
+n_epochs = b_data (:,start_ind();
 end
+
+% subs
+
+
 
 %% calc LZC
 
-for i = 1: size(n_epochs,3)
+for i = 1: size(data,3)
     
     % per electrode
-    Ce(i) = LZC_Rows (n_epochs(:,:,i),0);
+    Ce(i) = LZC_Rows (data(:,:,i),0);
     
     % per time point
-    Ct(i) = LZC_Rows (n_epochs(:,:,i),1);
+    Ct(i) = LZC_Rows (data(:,:,i),1);
     
     % per chained electrode? (unnecessary?)
 end

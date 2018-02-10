@@ -1,14 +1,8 @@
 function [h1,h2] = PlotSanityCheck (C,reps,chans,var_flag,title_insrt)
 x = 1-reps/chans; %% HERE
 y = C;
-% dSizes = cellfun(@(x) length(x),d);
-% DataCompSizes = cellfun(@(x) length(x),DataComp);
-% y = dSizes./b;
-% y = DataCompSizes./b;
 
 %%
-% x = rel_complx;
-% y = LZ_size;
 figure('name', 'data');
 h1 = scatter(x,y,'o');
 hold on
@@ -23,11 +17,9 @@ plot(x,yfit,'g')
 hold on
 yres = y - yfit;
 locvar = yres.^2;
-% slope = corrcoef(x,y); % wrong
 r = corrcoef(y,yfit);
 r = round(r(2),2); % (2) cuz diagonal is 1 and this is linear reg.
 center_yfit = (max(yfit)+min(yfit))/2;
-% text(0.6, center_yfit-2,sprintf('slope = %g',slope(2)),'fontsize',14,'color','blue')
 text(0.8, center_yfit,sprintf('r = %g',r),'fontsize',14,'color','green')
 
 %% non-linear regresion
