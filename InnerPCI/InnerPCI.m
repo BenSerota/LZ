@@ -1,4 +1,4 @@
-function [Ce, Ct] = InnerPCI (DATA,Jaco_flag,ZTHRESH1,ZTHRESH2,TIME_W)
+function [Ce, Ct] = InnerPCI (DATA,Jaco_flag,ZTHRESH1,ZTHRESH2,TIME_W,LZC_flag)
 % Calculates Lempel-Ziv Complexity of a certain time window following
 % naturally occuring internal events above threshold. Averaging over
 % events.
@@ -8,13 +8,9 @@ Ce = [];
 Ct = [];
 
 %% handling input
-if nargin ~= 5 % NOTE - be sure to change this according to final input structure
-    error('InnerPCI must receive 4 inputs: data, threshold1,threshold2 and time window')
+if nargin ~= 6 % NOTE - be sure to change this according to final input structure
+    error('InnerPCI must receive 6 inputs: data, threshold1,threshold2, time window and LZC_flag')
 end
-
-% if size (DATA,3) ~= 1
-%     error('Data must be a 2 dimensional matrix')
-% end
 
 if size(DATA,1) >= size(DATA,2)
     fprintf('CAUTION: data appears to be sparse: InnerPCI treats data structure as [Channels X Timepoints]')
@@ -50,45 +46,26 @@ end
 
 %% go
 
-%% OPTION 1: look for big events
-% find Events larger than ZTHRESH1
+% OPTION 1: look for big events
+
+%% find Events larger than ZTHRESH1
 [big_events, data] = fndEvents(DATA,Jaco_flag,ZTHRESH1,TIME_W);
-if numel(big_events) == 0;
+if numel(big_events) == 0
     return
 end
 clear DATA
-%binarize data according to ZTHRESH2
+%% binarize data according to ZTHRESH2
 b_data = binarize(data,ZTHRESH2);
 
-
-%% generate "new epochs"
-% "new epchs" = TIME_W after good events
-inds = big_events(:,3:4); % don't care about rows right now
-start_ind = unique(inds,'rows');
-end_ind  = start_ind(:,1) + 299; % to get to 300 TP 
-epochs = start_ind(:,2);
-
-n_epochs = nan(size(data,1),TIME_W,length(end_ind));
-for i = 1:length(end_ind)
-    n_epochs(:,:,i) = b_data (:,start_ind(i,1):end_ind(i,1),epochs(i));
-end
+%% generate "big-events epochs"
+[n_epochs] = big_events_epochs(big_events, TIME_W, data, b_data);
 
 %% calc LZC
+[Ce,Ct] = calc_LZC (n_epochs,LZC_flag);
+fprintf('You done boy');
 
-for i = 1: size(n_epochs,3)
-    
-    % per electrode
-    Ce(i) = LZC_Rows (n_epochs(:,:,i),0);
-    
-    % per time point
-    Ct(i) = LZC_Rows (n_epochs(:,:,i),1);
-    
-    % per chained electrode? (unnecessary?)
-end
+% OPTION 2: handle data with avalanche code so that now we have a single vector ?
 
-
-
-%% OPTION 2: handle data with avalanche code so that now we have a single vector ?
 
 
 
@@ -119,14 +96,11 @@ if numel(t) < numel(ind)
     error('some problem: identical indeces for big events')
 end
 
-
 % check which Events have enough data after them (TIME_W after them)
 % and throw away events that do not comply
-
 [ind1,ind2,ind3] = ind2sub(size(data), ind);
 subs = [ind1,ind2,ind3];
-    
-clear ind1 ind2 ind3 
+clear ind1 ind2 ind3
 cond = subs(:,2,:) <= ( size(data,2) - TIME_W );
 if nnz(cond) == 0
     fprintf('No Good Events Found! \n Consider shortening timewindow or lowering threshold1 or both \n')
@@ -139,10 +113,6 @@ Events = [evnts,subs]; %,empties];
 Events = sortrows(Events,-1); % '-1' =  'descend'
 
 
-
-
-
-
 function [binary] = binarize (DATA,ZTHRESH2)
 % transforms data to binary according to set threshold
 % data is either epoched or continuous, shouldn't matter now
@@ -151,3 +121,45 @@ function [binary] = binarize (DATA,ZTHRESH2)
 binary = DATA>ZTHRESH2;
 binary = double(binary);
 
+function [n_epochs] = big_events_epochs(big_events, TIME_W, data, b_data) 
+% "new epchs" = TIME_W after good events
+inds = big_events(:,3:4); % don't care about rows right now
+start_ind = unique(inds,'rows');
+end_ind  = start_ind(:,1) + (TIME_W - 1); % to get to TP
+epochs = start_ind(:,2);
+
+n_epochs = nan(size(data,1),TIME_W,length(end_ind));
+for i = 1:length(end_ind)
+    n_epochs(:,:,i) = b_data (:,start_ind(i,1):end_ind(i,1),epochs(i));
+end
+
+function [Ce,Ct] = calc_LZC (n_epochs,LZC_flag)
+Ce = [];
+Ct = [];
+s = size(n_epochs,3);
+
+switch LZC_flag
+    case 0
+        Ce = nan(1,s);
+        for i = 1:s
+            % per electrode
+            Ce(i) = LZC_Rows (n_epochs(:,:,i),0);
+        end
+    case 1
+        Ct = nan(1,s);
+        for i = 1:s
+            % per time point
+            Ct(i) = LZC_Rows (n_epochs(:,:,i),1);
+        end
+        
+    case 2
+        Ce = nan(1,s);
+        Ct = nan(1,s);
+        for i = 1:s
+            % per electrode
+            Ce(i) = LZC_Rows (n_epochs(:,:,i),0);
+            % per time point
+            Ct(i) = LZC_Rows (n_epochs(:,:,i),1);
+        end
+        % per chained electrode? (unnecessary?)
+end
