@@ -22,7 +22,4 @@ end
 figure()
 scatter (LZC_e,LZC_t)
 hold on
-lsline
-xlabel('LZC by channel')
-ylabel('LZC by electrode')
-title(' comparing LZC scores')
+lsline('g

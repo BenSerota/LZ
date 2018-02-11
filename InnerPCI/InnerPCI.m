@@ -9,11 +9,11 @@ Ct = [];
 
 %% handling input
 if nargin ~= 6 % NOTE - be sure to change this according to final input structure
-    error('InnerPCI must receive 6 inputs: data, threshold1,threshold2, time window and LZC_flag')
+    error('\n InnerPCI must receive 6 inputs: data, threshold1,threshold2, time window and LZC_flag')
 end
 
 if size(DATA,1) >= size(DATA,2)
-    fprintf('CAUTION: data appears to be sparse: InnerPCI treats data structure as [Channels X Timepoints]')
+    fprintf('\n CAUTION: data appears to be sparse: InnerPCI treats data structure as [Channels X Timepoints] \n')
 end
 
 if Jaco_flag ~= 1 && Jaco_flag ~= 0
@@ -22,9 +22,9 @@ if Jaco_flag ~= 1 && Jaco_flag ~= 0
 end
 
 if Jaco_flag
-    fprintf('This is Jaco Data \n')
+    fprintf('\n This is Jaco Data \n')
 else
-    fprintf('This is NOT Jaco Data, but a two dimansional matrix \n')
+    fprintf('\n This is NOT Jaco Data, but a two dimansional matrix \n')
 end
 
 if ZTHRESH1 > 10 || ZTHRESH1 < 0
@@ -40,12 +40,18 @@ if TIME_W < 100
 end
 
 if ZTHRESH1 <= ZTHRESH2
-    fprintf('CAUTION: thresh2 is greater than thresh1 or thresholds are equal')
+    fprintf('\n CAUTION: thresh2 is greater than thresh1 or thresholds are equal \n')
+end
+   
+if TIME_W >= size(DATA,2)
+    error('Time window is too large relative to data set size: no event can be found')
 end
 
-
+if LZC_flag ~=0 && LZC_flag ~=1
+    error('LZC_flag must be 0 or 1')
+end
 %% go
-
+fprintf('\n Initial check is OK: starting further calculations \n')
 % OPTION 1: look for big events
 
 %% find Events larger than ZTHRESH1
@@ -62,11 +68,10 @@ b_data = binarize(data,ZTHRESH2);
 
 %% calc LZC
 [Ce,Ct] = calc_LZC (n_epochs,LZC_flag);
-fprintf('You done boy');
+
+fprintf('\n You done boy ! \n');
 
 % OPTION 2: handle data with avalanche code so that now we have a single vector ?
-
-
 
 
 %% Excessory functions
@@ -93,7 +98,7 @@ ind = find(lgcl);
 % sanity check
 t = unique(ind);
 if numel(t) < numel(ind)
-    error('some problem: identical indeces for big events')
+    error('some problem: identical indeces for big events \n')
 end
 
 % check which Events have enough data after them (TIME_W after them)
@@ -111,7 +116,6 @@ evnts = evnts(cond,:);
 % empties = nan(length(ind),1);
 Events = [evnts,subs]; %,empties];
 Events = sortrows(Events,-1); % '-1' =  'descend'
-
 
 function [binary] = binarize (DATA,ZTHRESH2)
 % transforms data to binary according to set threshold
@@ -163,3 +167,6 @@ switch LZC_flag
         end
         % per chained electrode? (unnecessary?)
 end
+ 
+Ce = Ce';
+Ct = Ct';
