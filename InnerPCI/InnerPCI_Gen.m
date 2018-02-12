@@ -3,8 +3,8 @@ clear
 clc
 close 
 %% parameters
-Jaco_flag = 0; % 1;
-ZTHRESH1 = 1.7; %2.1; 
+Jaco_flag = 1; % 1;
+ZTHRESH1 = 1.5; %2.1; 
 ZTHRESH2 = 1.3; % .5; 
 TIME_W = 300;
 LZC_flag = 2; % 0 = rows, 1 = transpose, 2 = both rows + transpose
@@ -19,6 +19,8 @@ end
 
 [LZC_e, LZC_t] = InnerPCI (DATA,Jaco_flag,ZTHRESH1,ZTHRESH2,TIME_W,2);
 
+
+%% Polotting 
 figure()
 scatter (LZC_e,LZC_t)
 hold on

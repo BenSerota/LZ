@@ -42,13 +42,13 @@ end
 if ZTHRESH1 <= ZTHRESH2
     fprintf('\n CAUTION: thresh2 is greater than thresh1 or thresholds are equal \n')
 end
-   
+
 if TIME_W >= size(DATA,2)
     error('Time window is too large relative to data set size: no event can be found')
 end
 
-if LZC_flag ~=0 && LZC_flag ~=1
-    error('LZC_flag must be 0 or 1')
+if LZC_flag ~=0 && LZC_flag ~=1 && LZC_flag ~=2
+    error('LZC_flag must be either 0 or 1 or 2')
 end
 %% go
 fprintf('\n Initial check is OK: starting further calculations \n')
@@ -60,6 +60,10 @@ if numel(big_events) == 0
     return
 end
 clear DATA
+
+%% find optima of event series
+big_events = eventmax(big_events);
+
 %% binarize data according to ZTHRESH2
 b_data = binarize(data,ZTHRESH2);
 
@@ -115,7 +119,52 @@ subs = subs(cond,:);
 evnts = evnts(cond,:);
 % empties = nan(length(ind),1);
 Events = [evnts,subs]; %,empties];
-Events = sortrows(Events,-1); % '-1' =  'descend'
+% Events = sortrows(Events,-1); % '-1' =  'descend'
+
+function [sparse_events] = eventmax(Events)
+% If a series of big_events exists, akes only optimum point from each such.
+% "sparse_events" will be big events without any consequtive events.
+EventsR = sortrows(Events,2);
+EventsRind = 1:length(EventsR);
+EventsRind = EventsRind';
+EventsR(:,5) = EventsRind;
+clear EventsRind
+c = 0;
+NONMAX_ind = [];
+tmp = [];
+end_flag = 0;
+for i = 1:length(EventsR)-1
+    if EventsR(i,2) == EventsR(i+1,2) && EventsR(i,4) == EventsR(i+1,4)     % is same channel & same epoch
+        if EventsR(i,3) - EventsR(i+1,3) == -1
+            c = c+1;
+            if c == 1
+                tmp(c,:) = EventsR(i,:);
+                tmp(c+1,:) = EventsR(i+1,:);
+                c = c+1;
+            else
+                tmp(c,:) = EventsR(i,:);
+            end
+        else
+            if ~isempty(tmp) % FIXME : this right??
+                end_flag = 1;
+            end
+            
+            if end_flag
+                [~, I] = max(tmp(:,1));
+                max_ind = tmp(I,5);
+                tmp(I,:) = [];  % eliminate max
+                nonmax_ind = tmp(:,5);  % FIXME: problem with empty mat?
+                NONMAX_ind  = [NONMAX_ind ,nonmax_ind]; % update "elimination-list"
+                c = 0; tmp = []; end_flag = 0;    % must nullify everytime series is broken
+            end
+        end
+    end
+end
+NONMAX_ind  = NONMAX_ind';
+Events = sortrows(Events,2);
+sparse_events = Events;
+sparse_events(NONMAX_ind,:) = [];
+
 
 function [binary] = binarize (DATA,ZTHRESH2)
 % transforms data to binary according to set threshold
@@ -125,7 +174,7 @@ function [binary] = binarize (DATA,ZTHRESH2)
 binary = DATA>ZTHRESH2;
 binary = double(binary);
 
-function [n_epochs] = big_events_epochs(big_events, TIME_W, data, b_data) 
+function [n_epochs] = big_events_epochs(big_events, TIME_W, data, b_data)
 % "new epchs" = TIME_W after good events
 inds = big_events(:,3:4); % don't care about rows right now
 start_ind = unique(inds,'rows');
@@ -167,6 +216,6 @@ switch LZC_flag
         end
         % per chained electrode? (unnecessary?)
 end
- 
+
 Ce = Ce';
 Ct = Ct';
