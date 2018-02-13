@@ -48,9 +48,9 @@ end
 %% saving Worksapce
 cd(WS_path)
 if randbyrow
-    extra = '_randRow';
+    extra = ' RandRow';
 else
-    extra = '_randCol';
+    extra = ' RandCol';
 end
 SaveUnique(['Sanitycheck_Complexity' extra]);
 %% plotting
@@ -60,7 +60,7 @@ names = {['Chained Electrodes' extra],['Single Channels' extra],['Timepoints' ex
 
 for i = 1:3
     PlotSanityCheck (Cs{i},copies,rows,0,names{i});
-    savefig(['sanitycheck_' names{i}])
+    savefig(['sanitycheck ' names{i}])
     close
 end
 
