@@ -4,7 +4,7 @@ global conds subconds data_paths out_paths WS_path e N Zthresh % s
 
 DOC_basic
 if E_T_flag ~= 0 && E_T_flag ~= 1
-    error('first input must be 1/0 to choose per electrode or per TP')
+    error('first inpur must be 1/0 to choose per electrode or per TP')
 elseif E_T_flag
     descrip = 'Per_TP';
 else
