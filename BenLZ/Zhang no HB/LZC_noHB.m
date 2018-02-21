@@ -1,11 +1,11 @@
-function [LZCs_per_cond] = LZC_noHB(ratio_data, rates, event_flag, rate_flag ,task_flag)
+function [LZCs_per_cond] = LZC_noHB(data_ratio, rates, event_flag, rate_flag ,task_flag)
 % this function:
 % 1. takes INPUT ratio of jaco data and removes its HB component.
 % 2. calculates Lempel Ziv Complexity, Zhang implementaiton.
 % * task_flag = take into consideration LDGD / LDGS etc. tasks.
 
 %% handle input
-if ratio_data <= 0 || ratio_data > 1 
+if data_ratio <= 0 || data_ratio > 1 
     error('ration of data must be between 0 and 1')
 end
 
@@ -27,16 +27,18 @@ DOC_basic
 [NAMES,subjects,cond,subj] = DOC_Basic2(conds);
 finito = 0;
 
-if ratio_data < 1
-%     JacoClock = @JacoClock0;
-    subjects = round(ratio_data * subjects);
+% handle data_ratio < 1
+if data_ratio < 1
+    subjects = round(data_ratio * subjects);
+    % handle case where # subj is 0 due to low data_ratio
+    if nnz(subjects==0)>0
+        error('data_ratio appears to be too low, number of subjects in some conditions is 0')
+    end
     amount_sbjs = mat2cell(subjects);
     NAMES = cellfun(randperm, NAMES);
     temp = cellfun(@(x,y) x(1:y),NAMES,amount_sbjs);
     clear NAMES
     NAMES = temp;
-% else
-%     JacoClock = @JacoClock1;
 end
 
 if ~event_flag
@@ -54,13 +56,11 @@ for i = rates
     while ~finito
         [DATAwhb, rejcomps] = Do1Sbj(NAMES,cond,subj);
         DATAnhb = remove_HB(DATAwhb, rejcomps, num, lim, plothb);
-        [cond,subj, finito] = JacoClock(ratio_data, cond, subj);
+        [cond,subj, finito] = JacoClock(data_ratio, cond, subj);
     end
 end
-% don't forget to break into epochs. in LZC code or otherwise?
-% LZC
 
-%% functions
+%% assisting functions
 
 function [NAMES,subjects,cond,subj] = DOC_Basic2(conds)
 global out_paths
@@ -115,20 +115,6 @@ if cond > 4
     finito = 1;
 end
 
-% function [cond,subj, finito] = JacoClock1(subjects, cond, subj)
-%     
-% subj = subj + 1;
-% if subj > subjects(subj)
-%     cond = cond + 1;
-% end
-% 
-% if cond > 4
-%     finito = 1;
-% end
-
-% DATAwhb = final.TASK
-% rejcomps = Comps2Reject.TASK
-% plothb = 0/1;
 
 function [DATAnhb] = remove_HB(DATAwhb, rejcomps, num, lim, plothb)
 % This code is meant to remove a number of hb ICs form our data.
@@ -161,6 +147,7 @@ ICAact(rejcomps,:) = [];
 w_inv = pinv(DATAwhb.w*DATAwhb.sph);
 w_inv(:,rejcomps) = [];  % rejecting corresponding colomns
 DATAnhb = w_inv * ICAact;
+DATAnhb = reshape(DATAnhb,206,385,[]);
 
 
 function [C_task] = onetaskLZC(data)

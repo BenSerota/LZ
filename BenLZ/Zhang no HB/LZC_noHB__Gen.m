@@ -8,3 +8,4 @@ global out_paths subconds task_flag num lim plothb E_T_flag %#ok<NUSED>
 LZC_noHB_param
 
 [LZCs_per_cond] = LZC_noHB(ratio_data, rates, event_flag, rate_flag ,task_flag);
+% NOTE: lim?? where is this defined? global? not as main input?

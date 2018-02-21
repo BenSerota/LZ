@@ -3,13 +3,13 @@
 % r chooses how many of the first ICs to reject in each dataset:
 num = 1;
 % r chooses IC position, above which hb ICs are NOT rejected:
-lim = 20;
+lim = inf;
 
 % plot HB EEG ?
 plothb = 0;
 
 % how much of data to take into consideration (~(0,1))?
-ratio_data = 0.1;
+data_ratio = 0.1;
 
 % should we also seperate LZC scores by task?
 task_flag = 0;
@@ -21,5 +21,6 @@ E_T_flag = 0;
 % components are organized hierarchically).
 lim = inf;
 
-
+%determine event rates
+rates = [5 10 20 30 40];
 
