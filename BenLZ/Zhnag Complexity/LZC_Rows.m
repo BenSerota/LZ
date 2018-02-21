@@ -1,5 +1,7 @@
-% LZ complx, following Shang Zhang
 function [c_norm] = LZC_Rows (data,E_T_flag)
+% LZ complx, following Shang Zhang
+% this function accepts a 2-dimensional matrix
+
 % tic
 if E_T_flag
     data = data';       % IF TRANSPOSED => "electrodes" = Time Points!

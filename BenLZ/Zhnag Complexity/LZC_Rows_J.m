@@ -97,6 +97,7 @@ for i = 1:e %n
 end
 end
 
+% NOTE: stopped HERE. 20/02/18. continue by defining how to binarize data in two diff methods.
 function [binary] = onetaskLZCprep (data)
 % transforms data to binary according to set threshold
 global Zthresh
