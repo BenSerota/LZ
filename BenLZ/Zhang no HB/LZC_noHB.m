@@ -162,20 +162,17 @@ for i = 1:n
 end
 
 
-
-function [binary] = onetaskLZCprep0(data)
-% transforms data to binary according to set threshold
-global Zthresh
-data = reshape(data,206,385,[]);
-data = abs(zscore(data,0,3));
-binary = data>Zthresh;
-binary = double(binary);
+% function [binary] = onetaskLZCprep0(data)
+% % transforms data to binary according to pure Z-score 
+% 
+% data = abs(zscore(data,0,3));
+% binary = data>Zthresh;
+% binary = double(binary);
 
 function [binary] = onetaskLZCprep1(data)
-% transforms data to binary according to set threshold
-global Zthresh
-data = reshape(data,206,385,[]);
-data = abs(zscore(data,0,3));
+% transforms data to binary according to hilbert transform
+data = zscore(data,0,3);
+data = hilbert(data);
 binary = data>Zthresh;
 binary = double(binary);
 
