@@ -5,7 +5,7 @@ function [LZC] = LZC_noHB(data_ratio, rates, rate_flag , event_flag ,task_flag)
 % * task_flag = take into consideration LDGD / LDGS etc. tasks.
 
 global out_paths subconds num lim E_T_flag %#ok<NUSED>
-
+global onetaskLZCprep
 %% handle input
 if data_ratio <= 0 || data_ratio > 1 
     error('data ratio must be between 0 and 1')
@@ -29,17 +29,23 @@ DOC_Basic2;
 
 % handle data_ratio < 1
 if data_ratio < 1
-    amnt_sbjcts = round(data_ratio * amnt_sbjcts);
+    small_amnt_sbjcts = round(data_ratio * amnt_sbjcts);
     % handle case where # subj is 0 due to low data_ratio
-    if nnz(amnt_sbjcts==0)>0
+    if nnz(small_amnt_sbjcts==0)>0
         error('data_ratio appears to be too low, number of subjects in some conditions is 0')
     end
-    amnt_sbjcts = num2cell(amnt_sbjcts);    % moving to cell structure or @cellfun only
-    NAMES = cellfun(randperm, NAMES);
-    temp = cellfun(@(x,y) x(1:y), NAMES, amnt_sbjcts);
-    clear NAMES
-    NAMES = temp;
-    amnt_sbjcts = cell2mat(amnt_sbjcts); % returning to mat structure
+    amnt_sbjcts = num2cell(amnt_sbjcts);
+    small_amnt_sbjcts = num2cell(small_amnt_sbjcts);    % moving to cell structure for @cellfun only
+    names_inds = cellfun(@(x,y) randperm(x,y), amnt_sbjcts, small_amnt_sbjcts,'UniformOutput' ,false);
+   
+    %choosing subjects
+    for i = 1:length(names_inds)
+        temp{i} = NAMES{i}(names_inds{i});
+    end
+    
+    NAMES = temp; clear temp;
+    small_amnt_sbjcts = cell2mat(small_amnt_sbjcts); % returning to mat structure
+    amnt_sbjcts = small_amnt_sbjcts; % giving back to amnt_sbjcts for JacoClock !
 end
 
 if ~event_flag
@@ -53,21 +59,21 @@ if ~rate_flag
 end
 
 %% go 
-LZC = cell(1,lengh(conds));
+LZC = cell(1,length(conds));
 for rate = rates
     while ~finito
-        LZC{cond}(subj,:) = Do1Sbj(NAMES,cond,subj,rate); % allocate LZC scores (1 grade or 4... egal)
-        [cond,subj, finito] = JacoClock(data_ratio, cond, subj);    % advaning us in Jaco clock
+        LZC{cnd}(subj,:) = Do1Sbj(NAMES, cnd, subj, rate); % allocate LZC scores (1 grade or 4... egal)
+        [cnd, subj, finito] = JacoClock(amnt_sbjcts, cnd, subj);    % advaning us in Jaco clock
     end
 end
 
 %% assisting functions
 
 
-function [LZCsOneSubj] = Do1Sbj(NAMES,cond,subj,rate) % NOTE: consider making task_flag an input
-global out_paths subconds num lim plothb task_flag
-cd(out_paths{cond})
-name = NAMES{cond}(subj);
+function [LZCsOneSubj] = Do1Sbj(NAMES,cnd,subj,rate) % NOTE: consider making task_flag an input
+global out_paths subconds num lim task_flag
+cd(out_paths{cnd})
+name = char(NAMES{cnd}(subj));
 name_p = [ name '_prep'];
 name_I = [ name '_HBICs'];
 
@@ -83,8 +89,8 @@ for i  = 1:length(subconds)
     DATAwhb.sph = final.(subconds{i}).sph;
     rejcomps = Comps2Reject.(subconds{i});
     
-    DATAnhb = remove_HB(DATAwhb, rejcomps, num, lim, plothb);
-    LZCsOneSubj(i) = onetaskLZC(DATAnhb,rate);
+    DATAnhb = remove_HB(DATAwhb, rejcomps, num, lim); 
+    LZCsOneSubj(i) = onetaskLZC(DATAnhb,rate); % NOTE: stopped here!
     
     clear DATAwhb DATAnhb rejcomps
 end
@@ -104,7 +110,8 @@ ICAact = DATAwhb.w * DATAwhb.sph * DATAwhb.data;
 
 % choosing #num comps from all hb cmps
 if isempty(rejcomps)
-    return % no need to eliminate any comps
+    DATAnhb = DATAwhb; % no need to eliminate any comps
+    return
 elseif num > length(rejcomps)   % in case there are too few comps
     num = length(rejcomps);     % num = number of hb comps
 end
@@ -112,6 +119,7 @@ end
 % treating only comps below limit
 rejcomps(rejcomps>lim) = [];
 if isempty(rejcomps)    % if we are left with no comps, stop
+    DATAnhb = DATAwhb;
     return
 elseif length(rejcomps)<num % in case we are asking for too many comps than there are left
     num = length(rejcomps); 
@@ -179,15 +187,15 @@ binary = double(binary);
 % nnz(binary)/numel(binary)
 
 
-function [cond,subj, finito] = JacoClock(amnt_sbjcts, cond, subj)
+function [cnd,subj, finito] = JacoClock(amnt_sbjcts, cnd, subj)
 
 subj = subj + 1;
-if subj > amnt_sbjcts(cond)
-    cond = cond + 1;
+if subj > amnt_sbjcts(cnd)
+    cnd = cnd + 1;
     subj = 1;
 end
 
-if cond > 4
+if cnd > 4
     finito = 1;
 end
 
