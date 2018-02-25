@@ -4,7 +4,7 @@ function [LZC] = LZC_noHB(data_ratio, rates, rate_flag , event_flag ,task_flag)
 % 2. calculates Lempel Ziv Complexity, Zhang implementaiton.
 % * task_flag = take into consideration LDGD / LDGS etc. tasks.
 
-global out_paths subconds num lim E_T_flag %#ok<NUSED>
+global out_paths subconds num lim plothb E_T_flag %#ok<NUSED>
 
 %% handle input
 if data_ratio <= 0 || data_ratio > 1 
@@ -76,7 +76,6 @@ load(name_p);                                                              % loa
 load(name_I);                                                              % load HB info
 
 LZCsOneSubj = nan(1,length(subconds));
-
 for i  = 1:length(subconds)
     DATAwhb.data = final.(subconds{i}).data;
     DATAwhb.w = final.(subconds{i}).w;
@@ -85,18 +84,17 @@ for i  = 1:length(subconds)
     
     DATAnhb = remove_HB(DATAwhb, rejcomps, num, lim, plothb);
     LZCsOneSubj(i) = onetaskLZC(DATAnhb,rate);
-    
-    clear DATAwhb DATAnhb rejcomps
+    clear DATAwhb DATAnhb
 end
 
-if ~task_flag   % if not taking into consideration tasks, average.
+if ~task_flag
     LZCsOneSubj = mean(LZCsOneSubj);
 end
 
 clear final Comps2Reject   % just in case...
 
 
-function [DATAnhb] = remove_HB(DATAwhb, rejcomps, num, lim)
+function [DATAnhb] = remove_HB(DATAwhb, rejcomps, num, lim, plothb)
 % This code is meant to remove a number of hb ICs form our data.
 
 % ICA activation matrix  = W * Sph * Raw:
@@ -111,18 +109,18 @@ end
 
 % treating only comps below limit
 rejcomps(rejcomps>lim) = [];
-if isempty(rejcomps)    % if we are left with no comps, stop
+if isempty(rejcomps)
     return
-elseif length(rejcomps)<num % in case we are asking for too many comps than there are left
-    num = length(rejcomps); 
+elseif length(rejcomps)<num
+    num = length(rejcomps); % in case we are asking for too many comps than there are left.
 else
-    rejcomps = rejcomps(1:num); % otherwise, take first 'num comps
+    rejcomps = rejcomps(1:num);
 end
 
-% if plothb
-%     HB_ICs(1:num,:) = ICAact(rejcomps,:);
-%     plot(HB_ICs)
-% end
+if plothb
+    HB_ICs(1:num,:) = ICAact(rejcomps,:);
+    plot(HB_ICs)
+end
 
 %elimninating hb
 ICAact(rejcomps,:) = [];
@@ -135,25 +133,26 @@ DATAnhb = reshape(DATAnhb,206,385,[]);
 function [C_task] = onetaskLZC(data,rate)
 % computes LZ Complexity for a single task (3 dim matrix)
 global E_T_flag
-binary = onetaskLZCprep(data,rate);
-n = size(binary,3);
+data_binary = onetaskLZCprep(data,rate);
+n = size(data_binary,3);
 C_task = nan(1,n);
 
 for i = 1:n
-    C_task(i) = LZC_Rows(binary(:,:,i),E_T_flag);
+    C_task(i) = LZC_Rows(data_binary(:,:,i),E_T_flag);
 end
 
 
 function [binary] = onetaskLZCprep0(data,rate)
 % transforms data to binary according to zscore only
 data = zscore(data,0,2); % !! zscoring by row, automatically per epoch
-thresh = rate/2;
+rate = rate/2;
 % determining thresholds per row
-lowprc = prctile(data,thresh,2); % returns a 206x1 vec
-upprc = prctile(data,100-thresh,2);
+lowprc = prctile(data,rate,2); % returns a 206x1 vec
+upprc = prctile(data,100-rate,2);
 binary = nan(size(data));
+% per each row(! slowing us down!)
 % if in lowest or highest prcntiles, mark as event.
-for i = 1:size(data,1)  % FIXME: per each row(! slowing us down!)
+for i = 1:size(data,1)
     binary(i,:) = data(i,:) < lowprc(i) |  data(i,:) > upprc(i);
 end
 
@@ -163,11 +162,11 @@ binary = double(binary);
 function [binary] = onetaskLZCprep1(data,rate)
 % transforms data to binary according to zscore and hilbert transform
 data = zscore(data,0,2); % !! zscoring by row, automatically per epoch
-data = abs(hilbert(data)); % HILBERT. calcs per row as far as I understand 
-thresh = rate/2;
+data = abs(hilbert(data)); % calcs per row as far as I understand 
+rate = rate/2;
 % determining thresholds per row
-lowprc = prctile(data,thresh,2); % returns a 206x1 vec
-upprc = prctile(data,100-thresh,2);
+lowprc = prctile(data,rate,2); % returns a 206x1 vec
+upprc = prctile(data,100-rate,2);
 binary = nan(size(data));
 % per each row(! slowing us down!)
 % if in lowest or highest prcntiles, mark as event.
@@ -180,11 +179,10 @@ binary = double(binary);
 
 
 function [cond,subj, finito] = JacoClock(amnt_sbjcts, cond, subj)
-
+    
 subj = subj + 1;
 if subj > amnt_sbjcts(cond)
     cond = cond + 1;
-    subj = 1;
 end
 
 if cond > 4

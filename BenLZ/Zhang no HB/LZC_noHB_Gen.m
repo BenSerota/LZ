@@ -3,9 +3,10 @@
 clear
 clc
 start_ben
-global out_paths subconds task_flag num lim plothb E_T_flag %#ok<NUSED>
-
+global out_paths subconds num lim plothb E_T_flag %#ok<NUSED>
+DOC_basic
 LZC_noHB_param
 
-[LZCs_per_cond] = LZC_noHB(ratio_data, rates, event_flag, rate_flag ,task_flag);
-% NOTE: lim?? where is this defined? global? not as main input?
+[LZCs_per_cond] = LZC_noHB(data_ratio, rates, rate_flag, event_flag ,task_flag);
+
+%% plotting
