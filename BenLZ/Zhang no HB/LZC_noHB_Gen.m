@@ -2,8 +2,8 @@
 
 clear
 clc
-% start_ben
-global out_paths conds subconds num lim plothb E_T_flag %#ok<NUSED>
+start_ben
+global out_paths conds subconds num lim plothb E_T_flag  %#ok<NUSED>
 DOC_basic
 LZC_noHB_param
 

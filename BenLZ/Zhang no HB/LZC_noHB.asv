@@ -5,7 +5,7 @@ function [LZC] = LZC_noHB(data_ratio, rates, rate_flag , event_flag ,task_flag)
 % * task_flag = take into consideration LDGD / LDGS etc. tasks.
 
 global out_paths subconds num lim E_T_flag %#ok<NUSED>
-global onetaskLZCprep
+
 %% handle input
 if data_ratio <= 0 || data_ratio > 1 
     error('data ratio must be between 0 and 1')
@@ -48,12 +48,6 @@ if data_ratio < 1
     amnt_sbjcts = small_amnt_sbjcts; % giving back to amnt_sbjcts for JacoClock !
 end
 
-if ~event_flag
-    onetaskLZCprep = @onetaskLZCprep0;
-else 
-    onetaskLZCprep = @onetaskLZCprep1;
-end
-
 if ~rate_flag
     rates = rates(1);
 end
@@ -62,7 +56,7 @@ end
 LZC = cell(1,length(conds));
 for rate = rates
     while ~finito
-        LZC{cnd}(subj,:) = Do1Sbj(NAMES, cnd, subj, rate); % allocate LZC scores (1 grade or 4... egal)
+        LZC{cnd}(subj,:) = Do1Sbj(NAMES, cnd, subj, rate, event_flag); % allocate LZC scores (1 grade or 4... egal)
         [cnd, subj, finito] = JacoClock(amnt_sbjcts, cnd, subj);    % advaning us in Jaco clock
     end
 end
@@ -70,7 +64,7 @@ end
 %% assisting functions
 
 
-function [LZCsOneSubj] = Do1Sbj(NAMES,cnd,subj,rate) % NOTE: consider making task_flag an input
+function [LZCsOneSubj] = Do1Sbj(NAMES, cnd, subj, rate, event_flag) % NOTE: consider making task_flag an input
 global out_paths subconds num lim task_flag
 cd(out_paths{cnd})
 name = char(NAMES{cnd}(subj));
@@ -89,9 +83,12 @@ for i  = 1:length(subconds)
     DATAwhb.sph = final.(subconds{i}).sph;
     rejcomps = Comps2Reject.(subconds{i});
     
-    DATAnhb = remove_HB(DATAwhb, rejcomps, num, lim); 
-    LZCsOneSubj(i) = onetaskLZC(DATAnhb,rate);% NOTE: stopped here!
-    
+    DATAnhb = remove_HB(DATAwhb, rejcomps, num, lim);
+    try
+    LZCsOneSubj(i) = onetaskLZC(DATAnhb, rate, event_flag); % NOTE: double check . error ful.
+    catch
+        'fail stop'
+    end
     clear DATAwhb DATAnhb rejcomps
 end
 
@@ -110,7 +107,7 @@ ICAact = DATAwhb.w * DATAwhb.sph * DATAwhb.data;
 
 % choosing #num comps from all hb cmps
 if isempty(rejcomps)
-    DATAnhb = DATAwhb; % no need to eliminate any comps
+    DATAnhb = DATAwhb.data; % no need to eliminate any comps
     return
 elseif num > length(rejcomps)   % in case there are too few comps
     num = length(rejcomps);     % num = number of hb comps
@@ -119,7 +116,7 @@ end
 % treating only comps below limit
 rejcomps(rejcomps>lim) = [];
 if isempty(rejcomps)    % if we are left with no comps, stop
-    DATAnhb = DATAwhb;
+    DATAnhb = DATAwhb.data;
     return
 elseif length(rejcomps)<num % in case we are asking for too many comps than there are left
     num = length(rejcomps); 
@@ -137,24 +134,35 @@ ICAact(rejcomps,:) = [];
 w_inv = pinv(DATAwhb.w*DATAwhb.sph);
 w_inv(:,rejcomps) = [];  % rejecting corresponding colomns
 DATAnhb = w_inv * ICAact;
-DATAnhb = reshape(DATAnhb,206,385,[]);
+% NOTE: I don't to reshape now cuz
+% it's easier technically.
 
 
-function [C_task] = onetaskLZC(data,rate)
+function [C_task] = onetaskLZC(data, rate, event_flag)
 % computes LZ Complexity for a single task (3 dim matrix)
-global E_T_flag
-binary = onetaskLZCprep(data,rate);
+global E_T_flag % onetaskLZCprep
+
+try
+    binary = onetaskLZCprep(data, rate, event_flag);
+catch
+    'fail stop'
+end
+binary = reshape(binary,206,385,[]); 
 n = size(binary,3);
 C_task = nan(1,n);
 
 for i = 1:n
     C_task(i) = LZC_Rows(binary(:,:,i),E_T_flag);
 end
+i==n
 
 
-function [binary] = onetaskLZCprep0(data,rate)
+function [binary] = onetaskLZCprep(data, rate, event_flag)
 % transforms data to binary according to zscore only
 data = zscore(data,0,2); % !! zscoring by row, automatically per epoch
+if event_flag
+    data = abs(hilbert(data)); % HILBERT. calcs per row as far as I understand 
+end
 thresh = rate/2;
 % determining thresholds per row
 lowprc = prctile(data,thresh,2); % returns a 206x1 vec
@@ -164,27 +172,27 @@ binary = nan(size(data));
 for i = 1:size(data,1)  % FIXME: per each row(! slowing us down!)
     binary(i,:) = data(i,:) < lowprc(i) |  data(i,:) > upprc(i);
 end
-
+clear data
 binary = double(binary);
 % nnz(binary)/numel(binary)
 
-function [binary] = onetaskLZCprep1(data,rate)
-% transforms data to binary according to zscore and hilbert transform
-data = zscore(data,0,2); % !! zscoring by row, automatically per epoch
-data = abs(hilbert(data)); % HILBERT. calcs per row as far as I understand 
-thresh = rate/2;
-% determining thresholds per row
-lowprc = prctile(data,thresh,2); % returns a 206x1 vec
-upprc = prctile(data,100-thresh,2);
-binary = nan(size(data));
-% per each row(! slowing us down!)
-% if in lowest or highest prcntiles, mark as event.
-for i = 1:size(data,1)
-    binary(i,:) = data(i,:) < lowprc(i) |  data(i,:) > upprc(i);
-end
-
-binary = double(binary);
-% nnz(binary)/numel(binary)
+% function [binary] = onetaskLZCprep1(data,rate)
+% % transforms data to binary according to zscore and hilbert transform
+% data = zscore(data,0,2); % !! zscoring by row, automatically per epoch
+% data = abs(hilbert(data)); % HILBERT. calcs per row as far as I understand 
+% thresh = rate/2;
+% % determining thresholds per row
+% lowprc = prctile(data,thresh,2); % returns a 206x1 vec
+% upprc = prctile(data,100-thresh,2);
+% binary = nan(size(data));
+% % per each row(! slowing us down!)
+% % if in lowest or highest prcntiles, mark as event.
+% for i = 1:size(data,1)
+%     binary(i,:) = data(i,:) < lowprc(i) |  data(i,:) > upprc(i);
+% end
+% 
+% binary = double(binary);
+% % nnz(binary)/numel(binary)
 
 
 function [cnd,subj, finito] = JacoClock(amnt_sbjcts, cnd, subj)
