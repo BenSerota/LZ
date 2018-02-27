@@ -1,4 +1,4 @@
-global out_paths conds
+global out_paths conds 
 amnt_sbjcts = nan(1,length(conds));
 NAMES = cell(1,length(conds));
 for i = 1:length(conds)                                                     % over conditions

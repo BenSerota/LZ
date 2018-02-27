@@ -1,9 +1,10 @@
 % LZC_noHB_param
 %(data_ratio, rates, rate_flag, event_flag ,task_flag);
+global task_flag
 
 %% direct inputs
 % how much of data to take into consideration (~(0,1))?
-data_ratio = 0.042; % (rate min = 0.042)
+data_ratio = 0.2; % (rate min = 0.042)
 
 %determine event rates
 rates = [5 10 20 30 40];

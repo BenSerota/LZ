@@ -1,10 +1,10 @@
-function [LZC] = LZC_noHB(data_ratio, rates, rate_flag , event_flag ,task_flag)
+function [LZC] = LZC_noHB(data_ratio, rates, rate_flag , event_flag)
 % this function:
 % 1. takes INPUT ratio of jaco data and removes its HB component.
 % 2. calculates Lempel Ziv Complexity, Zhang implementaiton.
 % * task_flag = take into consideration LDGD / LDGS etc. tasks.
 
-global out_paths subconds num lim E_T_flag %#ok<NUSED>
+global out_paths subconds num lim E_T_flag task_flag %#ok<NUSED>
 
 %% handle input
 if data_ratio <= 0 || data_ratio > 1 
@@ -27,9 +27,9 @@ end
 
 DOC_Basic2;
 
-% handle data_ratio < 1
+%% handle data_ratio < 1
 if data_ratio < 1
-    small_amnt_sbjcts = round(data_ratio * amnt_sbjcts);
+    small_amnt_sbjcts = round(data_ratio * amnt_sbjcts); %#ok
     % handle case where # subj is 0 due to low data_ratio
     if nnz(small_amnt_sbjcts==0)>0
         error('data_ratio appears to be too low, number of subjects in some conditions is 0')
@@ -38,9 +38,10 @@ if data_ratio < 1
     small_amnt_sbjcts = num2cell(small_amnt_sbjcts);    % moving to cell structure for @cellfun only
     names_inds = cellfun(@(x,y) randperm(x,y), amnt_sbjcts, small_amnt_sbjcts,'UniformOutput' ,false);
    
-    %choosing subjects
+% choosing subjects
+temp = cell(1,length(names_inds));
     for i = 1:length(names_inds)
-        temp{i} = NAMES{i}(names_inds{i});
+        temp{i} = NAMES{i}(names_inds{i}); %#ok
     end
     
     NAMES = temp; clear temp;
@@ -87,7 +88,7 @@ for i  = 1:length(subconds)
     try
     LZCsOneSubj(i) = onetaskLZC(DATAnhb, rate, event_flag); % NOTE: double check . error ful.
     catch
-        'fail stop'
+        'fail stop';
     end
     clear DATAwhb DATAnhb rejcomps
 end
@@ -95,8 +96,6 @@ end
 if ~task_flag   % if not taking into consideration tasks, average.
     LZCsOneSubj = mean(LZCsOneSubj);
 end
-
-clear final Comps2Reject   % just in case...
 
 
 function [DATAnhb] = remove_HB(DATAwhb, rejcomps, num, lim)
@@ -118,11 +117,11 @@ rejcomps(rejcomps>lim) = [];
 if isempty(rejcomps)    % if we are left with no comps, stop
     DATAnhb = DATAwhb.data;
     return
-elseif length(rejcomps)<num % in case we are asking for too many comps than there are left
+elseif num > length(rejcomps) % in case we are asking for too many comps than there are left (after >lim elimination)
     num = length(rejcomps); 
-else
-    rejcomps = rejcomps(1:num); % otherwise, take first 'num comps
 end
+
+rejcomps = rejcomps(1:num); % take first 'num comps
 
 % if plothb
 %     HB_ICs(1:num,:) = ICAact(rejcomps,:);
@@ -134,8 +133,6 @@ ICAact(rejcomps,:) = [];
 w_inv = pinv(DATAwhb.w*DATAwhb.sph);
 w_inv(:,rejcomps) = [];  % rejecting corresponding colomns
 DATAnhb = w_inv * ICAact;
-% NOTE: I don't to reshape now cuz
-% it's easier technically.
 
 
 function [C_task] = onetaskLZC(data, rate, event_flag)
@@ -145,7 +142,7 @@ global E_T_flag % onetaskLZCprep
 try
     binary = onetaskLZCprep(data, rate, event_flag);
 catch
-    'fail stop'
+    'fail stop';
 end
 binary = reshape(binary,206,385,[]); 
 n = size(binary,3);
@@ -168,11 +165,9 @@ thresh = rate/2;
 lowprc = prctile(data,thresh,2); % returns a 206x1 vec
 upprc = prctile(data,100-thresh,2);
 binary = nan(size(data));
+
 % if in lowest or highest prcntiles, mark as event.
-for i = 1:size(data,1)  % FIXME: per each row(! slowing us down!)
-    binary(i,:) = data(i,:) < lowprc(i) |  data(i,:) > upprc(i);
-end
-clear data
+binary = bsxfun(@lt,data,lowprc) | bsxfun(@gt,data,upprc);
 binary = double(binary);
 % nnz(binary)/numel(binary)
 
@@ -202,6 +197,8 @@ if subj > amnt_sbjcts(cnd)
     cnd = cnd + 1;
     subj = 1;
 end
+
+finito = 0;
 
 if cnd > 4
     finito = 1;
