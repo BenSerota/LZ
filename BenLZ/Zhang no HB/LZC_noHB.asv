@@ -4,7 +4,7 @@ function [LZC] = LZC_noHB(data_ratio, rates, rate_flag , event_flag)
 % 2. calculates Lempel Ziv Complexity, Zhang implementaiton.
 % * task_flag = take into consideration LDGD / LDGS etc. tasks.
 
-global out_paths subconds num lim E_T_flag %#ok<NUSED>
+global out_paths subconds num lim E_T_flag task_flag plot_hb %#ok<NUSED>
 
 %% handle input
 if data_ratio <= 0 || data_ratio > 1 
@@ -15,8 +15,12 @@ if event_flag ~= 0 && event_flag ~= 1
     error('event_flag must be either 0 or 1, correspondig to pure Z score or Hilbert Transform')
 end
 
-if rate_flag ~= 0 && rate_flag ~= 1 
-    error('rate_flag must be either 1 or 0, indicating calculate 5 different event rates, or only the first')
+if rate_flag < 0 || rate_flag > length(rates) 
+    error('rate_flag must be a 0:length(rates) integer, indicating calculate 5 different event rates, or only a specific on (1:length(rates)')
+end
+
+if mod(rate_flag,1) ~= 0
+    error('rate_flag must a round integer between 0 and length(rates)')
 end
 
 if task_flag ~= 0 && task_flag ~= 1 
@@ -49,8 +53,8 @@ temp = cell(1,length(names_inds));
     amnt_sbjcts = small_amnt_sbjcts; % giving back to amnt_sbjcts for JacoClock !
 end
 
-if ~rate_flag
-    rates = rates(1);
+if rate_flag ~= 0
+    rates = rates(rate_flag);
 end
 
 %% go 
@@ -99,6 +103,7 @@ end
 
 
 function [DATAnhb] = remove_HB(DATAwhb, rejcomps, num, lim)
+global plot_hb
 % This code is meant to remove a number of hb ICs form our data.
 
 % ICA activation matrix  = W * Sph * Raw:
@@ -109,24 +114,28 @@ if isempty(rejcomps)
     DATAnhb = DATAwhb.data; % no need to eliminate any comps
     return
 elseif num > length(rejcomps)   % in case there are too few comps
-    num = length(rejcomps);     % num = number of hb comps
+        num = length(rejcomps);     % num = number of hb comps
 end
 
 % treating only comps below limit
 rejcomps(rejcomps>lim) = [];
+
 if isempty(rejcomps)    % if we are left with no comps, stop
     DATAnhb = DATAwhb.data;
     return
 elseif num > length(rejcomps) % in case we are asking for too many comps than there are left (after >lim elimination)
-    num = length(rejcomps); 
+        num = length(rejcomps);
 end
 
 rejcomps = rejcomps(1:num); % take first 'num comps
 
-% if plothb
-%     HB_ICs(1:num,:) = ICAact(rejcomps,:);
-%     plot(HB_ICs)
-% end
+if plot_hb
+    w_inv = pinv(DATAwhb.w*DATAwhb.sph);
+    alldata = w_inv * ICAact;
+    hb = alldata(rejcomps,:);
+    eegplot_CPL(hb,'srate',250,'dispchans',20,'winlength',5)
+    plot(hb);
+end
 
 %elimninating hb
 ICAact(rejcomps,:) = [];
@@ -171,24 +180,6 @@ binary = bsxfun(@lt,data,lowprc) | bsxfun(@gt,data,upprc);
 binary = double(binary);
 % nnz(binary)/numel(binary)
 
-% function [binary] = onetaskLZCprep1(data,rate)
-% % transforms data to binary according to zscore and hilbert transform
-% data = zscore(data,0,2); % !! zscoring by row, automatically per epoch
-% data = abs(hilbert(data)); % HILBERT. calcs per row as far as I understand 
-% thresh = rate/2;
-% % determining thresholds per row
-% lowprc = prctile(data,thresh,2); % returns a 206x1 vec
-% upprc = prctile(data,100-thresh,2);
-% binary = nan(size(data));
-% % per each row(! slowing us down!)
-% % if in lowest or highest prcntiles, mark as event.
-% for i = 1:size(data,1)
-%     binary(i,:) = data(i,:) < lowprc(i) |  data(i,:) > upprc(i);
-% end
-% 
-% binary = double(binary);
-% % nnz(binary)/numel(binary)
-
 
 function [cnd,subj, finito] = JacoClock(amnt_sbjcts, cnd, subj)
 
@@ -203,15 +194,3 @@ finito = 0;
 if cnd > 4
     finito = 1;
 end
-
-% function [] = SaveUniqueName(root_name)
-% if ~isstring(root_name) && ~ischar(root_name)
-%     error('input must be of class char or string')
-% end
-% cl = fix(clock);
-% stamp = strrep(mat2str(cl),' ','_');
-% stamp = strrep(stamp,'[','');
-% stamp = strrep(stamp,']','');
-% UniqueName = [root_name '_' stamp];
-% cd ('E:\Dropbox\Ben Serota\momentary\WS')
-% save (UniqueName)
