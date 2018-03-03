@@ -134,7 +134,8 @@ if plot_hb
     alldata = w_inv * ICAact;
     hb = alldata(rejcomps,:);
     eegplot_CPL(hb,'srate',250,'dispchans',20,'winlength',5)
-    plot(hb);
+    %     plot(hb);
+    pause
 end
 
 %elimninating hb

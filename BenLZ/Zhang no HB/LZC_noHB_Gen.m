@@ -20,8 +20,24 @@ SaveUniqueName('LZC_nohb', LZC_nohb_outpath)
      error('task_flag is 1, but I have not set up a plotting scheme for this yet');
  end
 
- 
+
  figitup(LZCs_per_cond,'LZC per condition',0)
+
+%% Variance tests
+%convert LZC scores to mat
+h = nan(4);
+p = nan(4);
+
+for i = 2:4 
+    [h(1,i),p(1,i)] = vartest2(LZCs_per_cond{1},LZCs_per_cond{i});
+end
+
+for i = 3:4 
+    [h(2,i),p(2,i)] = vartest2(LZCs_per_cond{2},LZCs_per_cond{i});
+end
+    [h(3,4),p(3,4)] = vartest2(LZCs_per_cond{3},LZCs_per_cond{4});
+
+
  
 %% Excessory Funcs
  

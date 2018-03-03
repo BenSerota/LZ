@@ -16,7 +16,7 @@ rate_flag = 3;
 event_flag = 1; 
 
 % should we also seperate LZC scores by task (0=no)?
-task_flag = 0;
+task_flag = 1;
 
 
 %% globals
@@ -31,4 +31,4 @@ lim = 30;
 E_T_flag = 0;
 
 % % plot HB EEG ?
-plot_hb = 0;
+plot_hb = 1;
