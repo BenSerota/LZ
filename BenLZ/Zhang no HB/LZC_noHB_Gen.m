@@ -14,33 +14,31 @@ SaveUniqueName('LZC_nohb', LZC_nohb_outpath)
 
 %% plotting
 
- if ~task_flag
-     LZCs_per_cond = cellfun(@(x) mean(x,2),LZCs_per_cond,'UniformOutpu',false');
- else
-     error('task_flag is 1, but I have not set up a plotting scheme for this yet');
- end
+% if not interested in Task seperation
+if ~task_flag
+    LZCs_to_plot = cellfun(@(x) mean(x,2),LZCs_per_cond,'UniformOutpu',false');
+else
+    LZCs_to_plot = LZCs_per_cond; % in order not to erase data
+end
 
+save_plot = 0;
+STEs = figLZC(LZCs_to_plot,'LZC per condition', save_plot, LZC_nohb_outpath);
 
- figitup(LZCs_per_cond,'LZC per condition',0)
-
-%% Variance tests
+%% Variance tests & bar plot
 %convert LZC scores to mat
-h = nan(4);
-p = nan(4);
 
-for i = 2:4 
-    [h(1,i),p(1,i)] = vartest2(LZCs_per_cond{1},LZCs_per_cond{i});
-end
+[H, P] = BensVarTest(LZCs_per_cond);
+LZCs_to_bar = cellfun(@(x) mean(mean(x)),LZCs_per_cond,'UniformOutpu',false');
+LZCs_to_bar = cell2mat(LZCs_to_bar);
+save_bar = 1;
+E = cellfun(@(x) mean(x,2), STEs);
+Pbar = prepP(P{5}); % P{5} are the Ps of the MEAN (over tasks)
 
-for i = 3:4 
-    [h(2,i),p(2,i)] = vartest2(LZCs_per_cond{2},LZCs_per_cond{i});
-end
-    [h(3,4),p(3,4)] = vartest2(LZCs_per_cond{3},LZCs_per_cond{4});
+BensSuperbar(LZCs_to_bar,Pbar,E,save_bar,Fig_path)
 
 
- 
 %% Excessory Funcs
- 
+
 function [] = SaveUniqueName(root_name,location)
 if ~isstring(root_name) && ~ischar(root_name)
     error('1st input (file name) must be of class char or string')
@@ -57,6 +55,13 @@ stamp = strrep(stamp,'[','');
 stamp = strrep(stamp,']','');
 UniqueName = [root_name '_' stamp];
 cd (location)
-save (UniqueName)
+evalin('base', sprintf('save ("%s");', UniqueName));
 end
- 
+
+function Pbar = prepP(chosen_P)
+ind1 = ~isnan(chosen_P); 
+Pbar = chosen_P;  
+Pbar(~ind1)=0;
+Pbar = Pbar + Pbar';
+Pbar(Pbar==0) = 1;
+end

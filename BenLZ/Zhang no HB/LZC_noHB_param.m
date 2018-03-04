@@ -4,13 +4,13 @@ global task_flag plot_hb
 
 %% direct inputs
 % how much of data to take into consideration (~(0,1))?
-data_ratio = 0.3; % (rate min = 0.042)
+data_ratio = 0.4; % (rate min = 0.042)
 
 %determine event rates
 rates = [5 10 20 30 40];
 
 %use 5 different event rates(=1) or only one (first) (=0)?
-rate_flag = 3;
+rate_flag = 4;
 
 %use zscore only(=0) or hilbert transform on zscore(=1)?
 event_flag = 1; 
@@ -31,4 +31,4 @@ lim = 30;
 E_T_flag = 0;
 
 % % plot HB EEG ?
-plot_hb = 1;
+plot_hb = 0;
