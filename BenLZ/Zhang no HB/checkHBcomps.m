@@ -1,31 +1,29 @@
-function [nums, positions] = checkHBcomps()
+function [nums, positions,NAMES,elements] = checkHBcomps()
 % this function:
 % 1. takes INPUT ratio of jaco data and removes its HB component.
 % 2. calculates Lempel Ziv Complexity, Zhang implementaiton.
 % * task_flag = take into consideration LDGD / LDGS etc. tasks.
 
-global out_paths subconds conds %#ok<NUSED>
-
-
 %% prepare
-
-DOC_Basic2;
+global conds
+DOC_Basic2; % inside there is NAMES, elements, etc...
 
 %% go
 [nums, positions] = deal(cell(1,length(conds)));
 while ~finito
-    [nums{cnd}(subj,:), positions{cnd}(subj,:)] = check1Sbj(NAMES, cnd, subj); % allocate lengths and nums of comps
+    [nums{cnd}(subj,:), positions{cnd}(subj,:), elements{cnd}(subj,:)] = check1Sbj(NAMES, cnd, subj); % allocate lengths and nums of comps
     [cnd, subj, finito] = JacoClock(amnt_sbjcts, cnd, subj);    % advaning us in Jaco clock
 end
 
 
 
 %% assisting functions
-function [nums, positions] = check1Sbj(NAMES, cnd, subj) % NOTE: consider making task_flag an input
+function [nums, positions, elements] = check1Sbj(NAMES, cnd, subj) % NOTE: consider making task_flag an input
 global out_paths subconds 
 cd(out_paths{cnd})
 name = char(NAMES{cnd}(subj));
 name_I = [ name '_HBICs'];
+name_P = [ name '_prep'];
 
 % load each set of ICs per subj
 load(name_I);                                                              % load HB info
@@ -38,6 +36,13 @@ for i  = 1:length(subconds)
     nums(i) = length(positions{i});
 end
 
+
+load(name_P)
+elements = nan(1,length(subconds));
+for i = length(subconds):-1:1                                       % treating each subcondition seperately
+    DATA = final.(subconds{i}).data;
+    elements(i) = size(DATA,2);
+end
 
 function [cnd,subj, finito] = JacoClock(amnt_sbjcts, cnd, subj)
 

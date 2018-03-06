@@ -1,7 +1,13 @@
-function [y_ste] = figLZC(C,Title, save_flag, outpath)
+function [y_ste] = figLZC(C,Title, task_flag, save_flag, outpath)
 % inputs are : (accumulated complexity Data,Title for plot, save_flag)
 % E.g.: (C, 'per Electrode', 1)
 DOC_basic
+
+% if not interested in Task seperation
+if task_flag
+    C = cellfun(@(x) mean(x,2),C,'UniformOutpu',false');
+end
+
 if size(C{1},2) == 4
     descrip = [Title '_per task'];
 else
@@ -12,7 +18,7 @@ y_ave = cell(1,4);
 y_std = cell(1,4);
 y_ste = cell(1,4);
 
-
+% scatter LSCz
 for i = 1:length(conds)
     for ii = 1:size(C{i},2) % over tasks ( didn't use 'length(subconds)' cuz sometime we disregard task (task_flag = 0)
         y = C{i}(:,ii); % = 1 task
@@ -37,6 +43,7 @@ for i = 1:length(conds)
     end
 end
 
+% plot means + errorbars
 for ii = 1:size(C{i},2)
     for i = 1:length(conds)
         % determing color by task

@@ -39,4 +39,10 @@ for ii = 1:l
     P{ii} = p;
 end
 
-% checking 
+
+
+
+% Tomer's input:
+% 1. anovan(
+% 2. individual t-tests
+% 3. corrected for mult comp
