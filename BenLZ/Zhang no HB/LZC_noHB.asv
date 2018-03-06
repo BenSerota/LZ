@@ -65,7 +65,7 @@ for rate = rates
         [cnd, subj, finito] = JacoClock(amnt_sbjcts, cnd, subj);    % advaning us in Jaco clock
         if subj == 1
             cd('E:\Dropbox\Ben Serota\momentary\WS')
-            save('LZCnoHB_partial_WS')
+            save(
         end
     end
 end

@@ -7,6 +7,7 @@ for i = 1:length(conds)                                                     % ov
     load([conds{i} '_names']);                                            % loads name list
     names = sortn(names);                                                   % for fun
     NAMES{i} = strrep(names,'.mat','');
+    NAMES{i} = strrep(NAMES{i},'_prep',''); 
     amnt_sbjcts(i) = length(names);
 end
 clear names
