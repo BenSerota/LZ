@@ -1,8 +1,6 @@
 function [nums, positions,NAMES,elements] = checkHBcomps()
 % this function:
-% 1. takes INPUT ratio of jaco data and removes its HB component.
-% 2. calculates Lempel Ziv Complexity, Zhang implementaiton.
-% * task_flag = take into consideration LDGD / LDGS etc. tasks.
+
 
 %% prepare
 global conds

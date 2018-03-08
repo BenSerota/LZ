@@ -1,8 +1,7 @@
-% LZC_noHB_Gen
-% 
+%LZC_noHB_Gen
+
 % clear
 % clc
-close all
 start_ben
 global out_paths conds subconds num lim plothb E_T_flag task_flag  %#ok<NUSED>
 DOC_basic
@@ -12,23 +11,15 @@ LZC_noHB_param
 % 
 % save WS
 % SaveUniqueName('LZC_nohb', LZC_nohb_outpath)
-
 % cd(LZC_nohb_outpath)
 % load('LZC_nohb_2018_3_5_6_32');
-load('/Users/admin/Desktop/secure draft/LZCnoHB_partial_WS.mat')
-LZCs_per_cond = LZC;
+% %
+load('HBCompsCount','LZCs2keep_inds')
+% add meaning omitnan.
 
-%% loading lengths of mtrices
-load('HBCompsCount','elements')
-low = 5e4;
-
-for i = 1:length(conds)
-    LZCs2keep_inds{i} = bsxfun(@lt,elements{i},low);
-end
 %% reject LZC scores from data that was too meagre
 % notice! works only on 100% of the data !!
 % because LZCs2keep_inds is indexed on entire data set.
-
 LZCs2keep = cell(1,length(conds));
 inds = cellfun(@(x) find(x), LZCs2keep_inds,'UniformOutput' ,false);
 LZCs2keep = LZCs_per_cond;
@@ -42,23 +33,18 @@ for i = 1:length(conds)
     means{i}(isnan(means{i})) = [];
 end    
 
-
-
 %% line plot
 save_plot = 0;
-STEs = figLZC(means,'LZC per condition',task_flag, save_plot, LZC_nohb_outpath);
-% used to be :
-% STEs = figLZC(LZCs_per_cond,'LZC per condition',task_flag, save_plot, LZC_nohb_outpath);
+STEs = figLZC(LZCs_per_cond,'LZC per condition',task_flag, save_plot, LZC_nohb_outpath);
 
-%% Significance tests & bar plot : old.
+%% Significance tests & bar plot
 
 % 1. run F test
-% LZCs_to_plot = cellfun(@(x) mean(x,2),LZCs_per_cond,'UniformOutpu',false');
-% P = BensAnovaTest(LZCs_per_cond,alpha);
-P = BensAnovaTest(means,alpha);
+LZCs_to_plot = cellfun(@(x) mean(x,2),LZCs_per_cond,'UniformOutpu',false');
+P = BensAnovaTest(LZCs_per_cond,alpha);
 % 2. run paired t-tests
 if P <= alpha
-    [H, Pt, inds] = BensTtest(means,alpha);
+    [H, Pt, inds] = BensTtest(LZCs_per_cond,alpha);
     
     % 3. correct for mult comp
     [Pt_cor, crit_p, h] = fdr_bh(Pt,alpha);
@@ -66,23 +52,20 @@ if P <= alpha
     % 4. prepare P values for Bar graph
     Ps4bar = prepP(Pt_cor,inds);
     
-    LZCs_to_bar = cellfun(@(x) mean(x),means,'UniformOutpu',false');
+    LZCs_to_bar = cellfun(@(x) mean(mean(x)),LZCs_per_cond,'UniformOutpu',false');
     LZCs_to_bar = cell2mat(LZCs_to_bar);
-    save_bar = 0;
-%     E = cellfun(@(x) mean(x,2), STEs);
-    E = cell2mat(STEs);
+    save_bar = 1;
+    E = cellfun(@(x) mean(x,2), STEs);
     
     BensSuperbar(LZCs_to_bar,Ps4bar,E,save_bar,LZC_nohb_outpath )
 end
-
-
 %% LZC distribution (violin plots)
-save_violin = 0;
+save_violin = 1;
 violin_fig(LZCs_to_plot,save_violin,LZC_nohb_outpath );
 
 %% save WS again , and finish
 SaveUniqueName('LZC_nohb', LZC_nohb_outpath)
-save('last_importantWS')
+
 
 %% Excessory Funcs
 
