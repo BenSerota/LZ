@@ -16,7 +16,7 @@ rate_flag = 5;
 event_flag = 1; 
 
 % should we also seperate LZC scores by task (0=no)?
-task_flag = 0;
+task_flag = 1;
 
 % alpha : significance
 alpha = 0.05;

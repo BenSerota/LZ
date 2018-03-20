@@ -4,8 +4,8 @@ function [y_ste] = figLZC(C,Title, task_flag, save_flag, outpath)
 DOC_basic
 
 % if not interested in Task seperation
-if task_flag
-    C = cellfun(@(x) mean(x,2),C,'UniformOutpu',false');
+if ~task_flag
+    C = cellfun(@(x) mean(x,2,'omitnan'),C,'UniformOutpu',false');
 end
 
 if size(C{1},2) == 4
@@ -24,7 +24,7 @@ for i = 1:length(conds)
         y = C{i}(:,ii); % = 1 task
         n = numel(y);
         x = repmat(i,n,1); % places LZC scores on x axis, on their task tick mark (1:4)
-        y_ave{i}(ii) = mean(y);
+        y_ave{i}(ii) = mean(y,'omitnan');
         y_std{i}(ii) = std(y);
         y_ste{i}(ii) = y_std{i}(ii) / sqrt(n);
         % determing color by task
@@ -86,6 +86,7 @@ xlim([0.5 4.5])
 ylim([0 1])
 set(gca,'xticklabel',conds)
 xlabel('Level of Consciousness')
+legend(subconds,'location','best');
 
 %saving figure
 if save_flag

@@ -15,15 +15,15 @@ LZC_noHB_param
 
 % cd(LZC_nohb_outpath)
 % load('LZC_nohb_2018_3_5_6_32');
-load('/Users/admin/Desktop/secure draft/LZCnoHB_partial_WS.mat')
+load('/Users/admin/Desktop/secure draft/LZCnoHB_partial_WS.mat') %% this is the heart of our data, allowing us no to run again
 LZCs_per_cond = LZC;
 
 %% loading lengths of mtrices
 load('HBCompsCount','elements')
-low = 5e4;
+thresh = mean(cell2mat(cellfun(@(x) prctile(x,25), m_el,'UniformOutput' , false))); % NOTE: decide if this is reasonable
 
 for i = 1:length(conds)
-    LZCs2keep_inds{i} = bsxfun(@lt,elements{i},low);
+    LZCs2keep_inds{i} = bsxfun(@lt,elements{i},thresh);
 end
 %% reject LZC scores from data that was too meagre
 % notice! works only on 100% of the data !!
@@ -40,12 +40,24 @@ for i = 1:length(conds)
     % truncating amount of LZC scores. should work well with cellfuns.
 
     means{i}(isnan(means{i})) = [];
-end    
+end
 
-
-
+% testing: removing columns 2 and 4: which are almost entirely NaNs!
+LZCsno2n4 = LZCs2keep;
+    LZCs1 = cellfun(@(x) x(:,1), LZCs2keep,'UniformOutput' ,false);
+%     LZCs3 = cellfun(@(x) x(:,3), LZCs2keep,'UniformOutput' ,false);
+% LZCsno2n4 = cellfun(@(x,y) cat(2,x,y),LZCs1,LZCs3,'UniformOutput' ,false);
+LZCsno2n4 = LZCs1;
+meanno2n4 = cellfun(@(x) mean(x,2,'omitnan'), LZCsno2n4,'UniformOutput' , false);
+meanno2n4  = LZCs1;
+for i = 1:length(conds)    
+    meanno2n4 {i}(isnan(meanno2n4 {i})) = [];
+end
+    
 %% line plot
 save_plot = 0;
+STEs = figLZC(LZCs2keep,'LZC per condition',task_flag, save_plot, LZC_nohb_outpath);
+STEs = figLZC(LZCsno2n4,'LZC per condition',task_flag, save_plot, LZC_nohb_outpath);
 STEs = figLZC(means,'LZC per condition',task_flag, save_plot, LZC_nohb_outpath);
 % used to be :
 % STEs = figLZC(LZCs_per_cond,'LZC per condition',task_flag, save_plot, LZC_nohb_outpath);
@@ -56,6 +68,7 @@ STEs = figLZC(means,'LZC per condition',task_flag, save_plot, LZC_nohb_outpath);
 % LZCs_to_plot = cellfun(@(x) mean(x,2),LZCs_per_cond,'UniformOutpu',false');
 % P = BensAnovaTest(LZCs_per_cond,alpha);
 P = BensAnovaTest(means,alpha);
+% P = BensAnovaTest(meanno2n4,alpha); means = meanno2n4;
 % 2. run paired t-tests
 if P <= alpha
     [H, Pt, inds] = BensTtest(means,alpha);
@@ -79,6 +92,7 @@ end
 %% LZC distribution (violin plots)
 save_violin = 0;
 violin_fig(LZCs_to_plot,save_violin,LZC_nohb_outpath );
+violin_fig(LZCs2keep,save_violin,LZC_nohb_outpath ); % TODO: change ytitle
 
 %% save WS again , and finish
 SaveUniqueName('LZC_nohb', LZC_nohb_outpath)
