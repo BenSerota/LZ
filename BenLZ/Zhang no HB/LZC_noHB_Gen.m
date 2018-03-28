@@ -1,7 +1,7 @@
 % LZC_noHB_Gen
 % 
-% clear
-% clc
+clear
+clc
 close all
 start_ben
 global out_paths conds subconds num lim plothb E_T_flag task_flag  %#ok<NUSED>
@@ -13,14 +13,14 @@ LZC_noHB_param
 % save WS
 % SaveUniqueName('LZC_nohb', LZC_nohb_outpath)
 
-% cd(LZC_nohb_outpath)
+cd(LZC_nohb_outpath)
 % load('LZC_nohb_2018_3_5_6_32');
 load('/Users/admin/Desktop/secure draft/LZCnoHB_partial_WS.mat') %% this is the heart of our data, allowing us no to run again
 LZCs_per_cond = LZC;
 
 %% loading lengths of mtrices
 load('HBCompsCount','elements')
-thresh = mean(cell2mat(cellfun(@(x) prctile(x,25), m_el,'UniformOutput' , false))); % NOTE: decide if this is reasonable
+thresh = mean(cell2mat(cellfun(@(x) prctile(x,25), elements,'UniformOutput' , false))); % NOTE: decide if this is reasonable
 
 for i = 1:length(conds)
     LZCs2keep_inds{i} = bsxfun(@lt,elements{i},thresh);
