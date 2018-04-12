@@ -1,4 +1,5 @@
-global out_paths conds 
+DOC_basic;
+% global out_paths conds
 amnt_sbjcts = nan(1,length(conds));
 NAMES = cell(1,length(conds));
 elements = cell(1,length(conds));

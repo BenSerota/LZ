@@ -16,5 +16,5 @@ end
 [H(3,4),P(3,4)] = ttest2(data{3},data{4},'Vartype','unequal','Alpha',alpha);
 
 inds = find(~isnan(P));
-P = P(~isnan(P));
+P = P(inds);
 H = H(~isnan(H));

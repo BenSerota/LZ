@@ -1,4 +1,4 @@
-function [y_ste] = figLZC(C,Title, task_flag, save_flag, outpath)
+function [y_ste] = figLZC(C,kind,Title, task_flag, save_flag, outpath)
 % inputs are : (accumulated complexity Data,Title for plot, save_flag)
 % E.g.: (C, 'per Electrode', 1)
 DOC_basic
@@ -78,8 +78,12 @@ for ii = 1:size(C{i},2)
     end
 end
 
-
-title(['Complexity grades per cond (' descrip ')'],'fontsize',16)
+switch kind
+    case 1
+        title(['Complexity grades per cond (' descrip ')'],'fontsize',16)
+    case 2
+        title(['BAD DATASETS Complexity grades per cond (' descrip ')'],'fontsize',16)
+end
 ylabel('LZ complexity grade')
 xticks(1:4)
 xlim([0.5 4.5])
