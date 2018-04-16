@@ -12,7 +12,6 @@ for i = 1:length(data)
 end
 labels = cat(1,temp{:});
 
-
 data = cat(1,data{1:4});
 
 P = group2fnt(data',labels);
