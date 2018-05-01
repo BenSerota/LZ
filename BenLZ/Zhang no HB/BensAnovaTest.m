@@ -1,5 +1,5 @@
 
-function [P] = BensAnovaTest(data, alpha)
+function [P] = BensAnovaTest(data, alpha,param)
 % calcs a single F test and returns p value
 
 %remove task seperation
@@ -14,13 +14,14 @@ labels = cat(1,temp{:});
 
 data = cat(1,data{1:4});
 
-P = group2fnt(data',labels);
+% P = group2fnt(data',labels);
+[P,t,stats,~] = anovan(data',labels,'sstype',1,'model','full','varnames',{'condition'});
 
 if P > alpha
-    fprintf('\n Effect not significant \n')
+    fprintf('\n Oh NO! Condition Effect not significant in %2 \n',params)
     return
 else
-    fprintf('\n YAY! Effect is significant, at p = %g \n',P)
+    fprintf('\n YAY! %s paramater shows condition effect, significant at p = %g \n', upper(param),P)
 end
 
 
