@@ -54,7 +54,7 @@ else
 end
 SaveUnique(['Sanitycheck_Complexity' extra]);
 %% plotting
-cd(Fig_path)
+cd(mom_Fig_path)
 Cs = {C_chained,C_channels,C_timepoints};
 names = {['Chained Electrodes' extra],['Single Channels' extra],['Timepoints' extra]};
 

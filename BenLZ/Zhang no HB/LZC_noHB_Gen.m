@@ -16,7 +16,7 @@ LZC_noHB_param
 % cd(LZC_nohb_outpath)
 % load('/Users/admin/Desktop/secure draft/LZCnoHB_partial_WS.mat') %% this is the heart of our data, allowing us no to run again
 % LZCs_per_cond = LZC;
-cd('/Users/admin/Dropbox/Ben Serota/eeg ANALYSES/results/LZC')
+cd(LZ_rslts)
 load('last_importantWS')
 
 %% loading lengths of mtrices
@@ -117,9 +117,9 @@ for i = 1:2
     
     %% Significance tests & bar plot : old.
     
-    
+    LZC_flag = 1; % doing LZC and not avalanches 
     % 1. run F test
-    P = BensAnovaTest(data,alpha);
+    P = BensAnovaTest(data,alpha); % doing LZC and not avalanches 
     
     % 2. run paired t-tests
 %     if P <= alpha

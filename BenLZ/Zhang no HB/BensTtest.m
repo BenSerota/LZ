@@ -1,6 +1,8 @@
 
 function [H,P,inds] = BensTtest(data, alpha)
-% calcs a single F test and returns p value
+global LZC_flag grp conds
+% calcs 6 pairs of t-tests and returns p value
+
 [H,P] = deal(nan(length(data)));
 
 data = cellfun(@(x) mean(x,2), data, 'uniformoutput',false);
