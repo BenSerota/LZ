@@ -27,7 +27,7 @@ if P > alpha
     fprintf('\n Oh NO! Condition Effect not significant in %s \n',param)
     return
 else
-    fprintf('\n YAY! %s paramater shows condition effect, significant at p = %g \n', upper(param),P)
+    fprintf('\n YAY! %s paramater shows condition effect, F = %g, significant at p = %g \n', upper(param),t{2,6},P)
 end
 
 
