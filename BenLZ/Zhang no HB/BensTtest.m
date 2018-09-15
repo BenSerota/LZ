@@ -1,6 +1,6 @@
 
 function [H,P,inds] = BensTtest(data, alpha)
-global LZC_flag grp conds
+%global LZC_flag grp conds
 % calcs 6 pairs of t-tests and returns p value
 
 [H,P] = deal(nan(length(data)));
